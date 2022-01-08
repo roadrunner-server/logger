@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/fatih/color v1.13.0
-	github.com/roadrunner-server/api v0.0.0-20220107213740-5446f25f085c
+	github.com/roadrunner-server/api v0.0.0-20220108004512-4970c1a12540
 	github.com/spiral/endure v1.1.0
 	github.com/spiral/errors v1.0.12
 	github.com/spiral/roadrunner/v2 v2.7.0-beta.1
@@ -16,7 +16,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/hashicorp/go-version v1.4.0 // indirect
-	github.com/mattn/go-colorable v0.1.9 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spiral/tcplisten v1.0.0 // indirect
