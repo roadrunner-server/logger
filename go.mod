@@ -1,4 +1,4 @@
-module github.com/roadrunner-server/logger
+module github.com/roadrunner-server/logger/v2
 
 go 1.17
 
