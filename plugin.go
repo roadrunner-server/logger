@@ -2,8 +2,8 @@ package logger
 
 import (
 	"github.com/roadrunner-server/api/plugins/v2/config"
-	endure "github.com/spiral/endure/pkg/container"
-	"github.com/spiral/errors"
+	endure "github.com/roadrunner-server/endure/pkg/container"
+	"github.com/roadrunner-server/errors"
 	"go.uber.org/zap"
 )
 
