@@ -106,11 +106,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 		zCfg = zap.Config{
 			Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
 			Development: false,
-			Sampling: &zap.SamplingConfig{
-				Initial:    100,
-				Thereafter: 100,
-			},
-			Encoding: "json",
+			Encoding:    "json",
 			EncoderConfig: zapcore.EncoderConfig{
 				TimeKey:        "ts",
 				LevelKey:       "level",
