@@ -10,15 +10,15 @@ import (
 // PluginName declares plugin name.
 const PluginName = "logs"
 
-// ZapLogger manages zap logger.
-type ZapLogger struct {
+// Plugin manages zap logger.
+type Plugin struct {
 	base     *zap.Logger
 	cfg      *Config
 	channels ChannelConfig
 }
 
 // Init logger service.
-func (z *ZapLogger) Init(cfg config.Configurer) error {
+func (z *Plugin) Init(cfg config.Configurer) error {
 	const op = errors.Op("config_plugin_init")
 	var err error
 	// if not configured, configure with default params
@@ -53,17 +53,17 @@ func (z *ZapLogger) Init(cfg config.Configurer) error {
 	return nil
 }
 
-func (z *ZapLogger) Serve() chan error {
+func (z *Plugin) Serve() chan error {
 	return make(chan error, 1)
 }
 
-func (z *ZapLogger) Stop() error {
+func (z *Plugin) Stop() error {
 	_ = z.base.Sync()
 	return nil
 }
 
 // NamedLogger returns logger dedicated to the specific channel. Similar to Named() but also reads the core params.
-func (z *ZapLogger) NamedLogger(name string) (*zap.Logger, error) {
+func (z *Plugin) NamedLogger(name string) (*zap.Logger, error) {
 	if cfg, ok := z.channels.Channels[name]; ok {
 		l, err := cfg.BuildLogger()
 		if err != nil {
@@ -76,18 +76,18 @@ func (z *ZapLogger) NamedLogger(name string) (*zap.Logger, error) {
 }
 
 // ServiceLogger returns logger dedicated to the specific channel. Similar to Named() but also reads the core params.
-func (z *ZapLogger) ServiceLogger(n endure.Named) (*zap.Logger, error) {
+func (z *Plugin) ServiceLogger(n endure.Named) (*zap.Logger, error) {
 	return z.NamedLogger(n.Name())
 }
 
 // Provides declares factory methods.
-func (z *ZapLogger) Provides() []interface{} {
+func (z *Plugin) Provides() []interface{} {
 	return []interface{}{
 		z.ServiceLogger,
 	}
 }
 
 // Name returns user-friendly plugin name
-func (z *ZapLogger) Name() string {
+func (z *Plugin) Name() string {
 	return PluginName
 }
