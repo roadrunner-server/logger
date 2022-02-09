@@ -19,6 +19,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
-	golang.org/x/sys v0.0.0-20220207234003-57398862261d // indirect
+	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
