@@ -27,6 +27,8 @@ github.com/roadrunner-server/api/v2 v2.13.0 h1:ZR2qQj6K+YqiBETJh6Xku4lELlSYz/B4Z
 github.com/roadrunner-server/api/v2 v2.13.0/go.mod h1:9G+q/c2yxV3MFv47MLw1dwggDG1AsSyxYaMuQ8BQugo=
 github.com/roadrunner-server/endure v1.2.1 h1:LwapekBTGlsgEXR6Fbp50WYIjAGq/FwTssZThemyawE=
 github.com/roadrunner-server/endure v1.2.1/go.mod h1:36kWruojFlPhtsP/is8wVtWGYuGGxUWDVnn1TTBbbas=
+github.com/roadrunner-server/endure v1.2.2 h1:MuNT8jjg75OczvMdj1h8KUBWKaQbpUrN2ymkTOA+QpQ=
+github.com/roadrunner-server/endure v1.2.2/go.mod h1:MzEmu0galbhgNGMeVcb5u7PqHz2uvpeyFzKlC82O25E=
 github.com/roadrunner-server/errors v1.1.2 h1:+LPw9Akgg+8LAGM4wASMWLAoBIbyP+mhNfR+FBS2Slw=
 github.com/roadrunner-server/errors v1.1.2/go.mod h1:jVSh32nFtRMzKItYUM9W2CTLLpXAM8HseL2lUENPYtU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -65,6 +67,8 @@ golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220317061510-51cd9980dadf h1:Fm4IcnUL803i92qDlmB0obyHmosDrxZWxJL3gIeNqOw=
 golang.org/x/sys v0.0.0-20220317061510-51cd9980dadf/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220318055525-2edf467146b5 h1:saXMvIOKvRFwbOMicHXr0B1uwoxq9dGmLe5ExMES6c4=
+golang.org/x/sys v0.0.0-20220318055525-2edf467146b5/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
