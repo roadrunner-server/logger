@@ -25,6 +25,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/roadrunner-server/api/v2 v2.14.0 h1:U7CrMXv5h8qlO9vvqdvPDK0g+zMLwcERUAPcoLy6tYs=
 github.com/roadrunner-server/api/v2 v2.14.0/go.mod h1:COjb3T7DYHydaKIfino/N8gVa8op1jGAXFF+qKHMnk0=
+github.com/roadrunner-server/api/v2 v2.17.0 h1:uB7bi4qt1FhWq4pOosWfyzJjInGztvf4mQcuUCzMGGI=
+github.com/roadrunner-server/api/v2 v2.17.0/go.mod h1:kTic07XUaHlPub5Pe1d9mdukYw840oJ4S/fkH2fUURs=
 github.com/roadrunner-server/endure v1.2.3 h1:Smm+pHDERzeqXsLO602oe5iy0q+w94jAH3UT1pqgZiY=
 github.com/roadrunner-server/endure v1.2.3/go.mod h1:Yahi4Uoabla2o+0N+pbjWwIJnAigYWppGwbLU3D6cLc=
 github.com/roadrunner-server/errors v1.1.2 h1:+LPw9Akgg+8LAGM4wASMWLAoBIbyP+mhNfR+FBS2Slw=
@@ -65,6 +67,8 @@ golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220429121018-84afa8d3f7b3 h1:kBsBifDikLCf5sUMbcD8p73OinDtAQWQp8+n7FiyzlA=
 golang.org/x/sys v0.0.0-20220429121018-84afa8d3f7b3/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 h1:Js08h5hqB5xyWR789+QqueR6sDE8mk+YvpETZ+F6X9Y=
+golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
