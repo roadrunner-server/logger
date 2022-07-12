@@ -62,22 +62,9 @@ func (z *Plugin) Stop() error {
 	return nil
 }
 
-// NamedLogger returns logger dedicated to the specific channel. Similar to Named() but also reads the core params.
-func (z *Plugin) NamedLogger(name string) (*zap.Logger, error) {
-	if cfg, ok := z.channels.Channels[name]; ok {
-		l, err := cfg.BuildLogger()
-		if err != nil {
-			return nil, err
-		}
-		return l.Named(name), nil
-	}
-
-	return z.base.Named(name), nil
-}
-
 // ServiceLogger returns logger dedicated to the specific channel. Similar to Named() but also reads the core params.
 func (z *Plugin) ServiceLogger(n endure.Named) (*zap.Logger, error) {
-	return z.NamedLogger(n.Name())
+	return z.namedLogger(n.Name())
 }
 
 // Provides declares factory methods.
@@ -90,4 +77,17 @@ func (z *Plugin) Provides() []interface{} {
 // Name returns user-friendly plugin name
 func (z *Plugin) Name() string {
 	return PluginName
+}
+
+// namedLogger returns logger bound to the specific channel
+func (z *Plugin) namedLogger(name string) (*zap.Logger, error) {
+	if cfg, ok := z.channels.Channels[name]; ok {
+		l, err := cfg.BuildLogger()
+		if err != nil {
+			return nil, err
+		}
+		return l.Named(name), nil
+	}
+
+	return z.base.Named(name), nil
 }

@@ -12,7 +12,7 @@ import (
 // ChannelConfig configures loggers per channel.
 type ChannelConfig struct {
 	// Dedicated channels per logger. By default logger allocated via named logger.
-	Channels map[string]Config `mapstructure:"channels"`
+	Channels map[string]*Config `mapstructure:"channels"`
 }
 
 // FileLoggerConfig structure represents configuration for the file logger
