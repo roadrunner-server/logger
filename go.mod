@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/fatih/color v1.13.0
-	github.com/roadrunner-server/api/v2 v2.18.0
+	github.com/roadrunner-server/api/v2 v2.19.0
 	github.com/roadrunner-server/endure v1.3.0
 	github.com/roadrunner-server/errors v1.1.2
 	go.uber.org/zap v1.21.0
