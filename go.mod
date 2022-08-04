@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/fatih/color v1.13.0
 	github.com/roadrunner-server/api/v2 v2.20.0
-	github.com/roadrunner-server/endure v1.3.1
+	github.com/roadrunner-server/endure v1.4.0
 	github.com/roadrunner-server/errors v1.1.2
 	go.uber.org/zap v1.21.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -18,6 +18,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/sys v0.0.0-20220731174439-a90be440212d // indirect
+	golang.org/x/sys v0.0.0-20220803195053-6e608f9ce704 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
