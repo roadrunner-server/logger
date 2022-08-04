@@ -68,8 +68,8 @@ func (z *Plugin) ServiceLogger(n endure.Named) (*zap.Logger, error) {
 }
 
 // Provides declares factory methods.
-func (z *Plugin) Provides() []interface{} {
-	return []interface{}{
+func (z *Plugin) Provides() []any {
+	return []any{
 		z.ServiceLogger,
 	}
 }
