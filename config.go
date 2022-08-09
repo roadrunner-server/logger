@@ -155,6 +155,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				MessageKey:  "message",
 				LineEnding:  cfg.LineEnding,
 				EncodeLevel: ColoredLevelEncoder,
+				EncodeTime:  zapcore.EpochTimeEncoder,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
