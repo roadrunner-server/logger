@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/fatih/color v1.13.0
 	github.com/roadrunner-server/api/v2 v2.21.0
-	github.com/roadrunner-server/endure v1.4.2
+	github.com/roadrunner-server/endure v1.4.3
 	github.com/roadrunner-server/errors v1.2.0
 	go.uber.org/zap v1.22.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
