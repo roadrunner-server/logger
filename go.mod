@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/fatih/color v1.13.0
-	github.com/roadrunner-server/api/v2 v2.21.2
+	github.com/roadrunner-server/api/v2 v2.22.2-rc.1
 	github.com/roadrunner-server/endure v1.4.5
 	github.com/roadrunner-server/errors v1.2.0
 	go.uber.org/zap v1.23.0
@@ -18,6 +18,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/sys v0.0.0-20220906165534-d0df966e6959 // indirect
+	golang.org/x/sys v0.0.0-20220907062415-87db552b00fd // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
