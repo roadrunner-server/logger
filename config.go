@@ -152,10 +152,9 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 			Level:    zap.NewAtomicLevelAt(zap.InfoLevel),
 			Encoding: "console",
 			EncoderConfig: zapcore.EncoderConfig{
-				MessageKey:  "message",
-				LineEnding:  cfg.LineEnding,
-				EncodeLevel: ColoredLevelEncoder,
-				EncodeTime:  zapcore.EpochTimeEncoder,
+				MessageKey: "message",
+				LineEnding: cfg.LineEnding,
+				EncodeTime: zapcore.EpochTimeEncoder,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
