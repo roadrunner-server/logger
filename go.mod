@@ -1,10 +1,9 @@
-module github.com/roadrunner-server/logger/v2
+module github.com/roadrunner-server/logger/v3
 
 go 1.19
 
 require (
 	github.com/fatih/color v1.13.0
-	github.com/roadrunner-server/api/v2 v2.23.0
 	github.com/roadrunner-server/endure v1.4.5
 	github.com/roadrunner-server/errors v1.2.0
 	go.uber.org/zap v1.23.0

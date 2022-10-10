@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"github.com/roadrunner-server/api/v2/plugins/config"
 	endure "github.com/roadrunner-server/endure/pkg/container"
 	"github.com/roadrunner-server/errors"
 	"go.uber.org/zap"
@@ -9,6 +8,14 @@ import (
 
 // PluginName declares plugin name.
 const PluginName = "logs"
+
+type Configurer interface {
+	// UnmarshalKey takes a single key and unmarshal it into a Struct.
+	UnmarshalKey(name string, out any) error
+
+	// Has checks if config section exists.
+	Has(name string) bool
+}
 
 // Plugin manages zap logger.
 type Plugin struct {
@@ -18,7 +25,7 @@ type Plugin struct {
 }
 
 // Init logger service.
-func (z *Plugin) Init(cfg config.Configurer) error {
+func (z *Plugin) Init(cfg Configurer) error {
 	const op = errors.Op("config_plugin_init")
 	var err error
 	// if not configured, configure with default params
