@@ -15,8 +15,8 @@ github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
-github.com/roadrunner-server/endure/v2 v2.0.0-rc.2 h1:RP9DT8JMxcL8UYVqJ4xf/WW6DpJ+nNROOhlTS7h4mQU=
-github.com/roadrunner-server/endure/v2 v2.0.0-rc.2/go.mod h1:7D5spRK0piHrQrrTvgS4LZ6PvUB5FnLn7fiHf7vHISs=
+github.com/roadrunner-server/endure/v2 v2.0.0 h1:QHQZdNP8PjMm7A3W7vKVHsbTV3Gj4u+UirECKRVB+/s=
+github.com/roadrunner-server/endure/v2 v2.0.0/go.mod h1:RDrC9SFlyCGqGA2v9SqFIA+EqWTFmPxafIb4SMeHCHM=
 github.com/roadrunner-server/errors v1.2.0 h1:qBmNXt8Iex9QnYTjCkbJKsBZu2EtYkQCM06GUDcQBbI=
 github.com/roadrunner-server/errors v1.2.0/go.mod h1:z0ECxZp/dDa5RahtMcy4mBIavVxiZ9vwE5kByl7kFtY=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
