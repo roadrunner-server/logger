@@ -3,6 +3,7 @@ package logger
 import (
 	"os"
 	"strings"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -117,7 +118,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				StacktraceKey:  zapcore.OmitKey,
 				LineEnding:     cfg.LineEnding,
 				EncodeLevel:    zapcore.LowercaseLevelEncoder,
-				EncodeTime:     zapcore.EpochTimeEncoder,
+				EncodeTime:     utcEpochTimeEncoder,
 				EncodeDuration: zapcore.SecondsDurationEncoder,
 				EncodeCaller:   zapcore.ShortCallerEncoder,
 			},
@@ -140,7 +141,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				LineEnding:     cfg.LineEnding,
 				EncodeLevel:    ColoredLevelEncoder,
 				EncodeName:     ColoredNameEncoder,
-				EncodeTime:     zapcore.ISO8601TimeEncoder,
+				EncodeTime:     utcISO8601TimeEncoder,
 				EncodeDuration: zapcore.StringDurationEncoder,
 				EncodeCaller:   zapcore.ShortCallerEncoder,
 			},
@@ -154,7 +155,6 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 			EncoderConfig: zapcore.EncoderConfig{
 				MessageKey: "message",
 				LineEnding: cfg.LineEnding,
-				EncodeTime: zapcore.EpochTimeEncoder,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
@@ -174,7 +174,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				LineEnding:     cfg.LineEnding,
 				EncodeLevel:    ColoredLevelEncoder,
 				EncodeName:     ColoredNameEncoder,
-				EncodeTime:     zapcore.ISO8601TimeEncoder,
+				EncodeTime:     utcISO8601TimeEncoder,
 				EncodeDuration: zapcore.StringDurationEncoder,
 				EncodeCaller:   zapcore.ShortCallerEncoder,
 			},
@@ -242,4 +242,12 @@ func (cfg *Config) InitDefault() {
 	if cfg.LineEnding == "" {
 		cfg.LineEnding = zapcore.DefaultLineEnding
 	}
+}
+
+func utcISO8601TimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.UTC().Format("2006-01-02T15:04:05-0700"))
+}
+
+func utcEpochTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendInt64(t.UTC().UnixNano())
 }
