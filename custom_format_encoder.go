@@ -29,15 +29,15 @@ func (e *customFormatEncoder) EncodeEntry(entry zapcore.Entry, fields []zapcore.
 	}
 
 	for s, r := range replace {
-		str = strings.Replace(str, s, r, -1)
+		str = strings.ReplaceAll(str, s, r)
 	}
 
-	var contextValues []string
+	var contextValues = make([]string, 0, len(fields))
 	for _, v := range fields {
 		contextValues = append(contextValues, v.String)
 	}
 
-	str = strings.Replace(str, "%context%", strings.Join(contextValues, " "), -1)
+	str = strings.ReplaceAll(str, "%context%", strings.Join(contextValues, " "))
 
 	pool := buffer.NewPool()
 	buf := pool.Get()
