@@ -91,7 +91,7 @@ type Config struct {
 	// Note that this setting only affects internal errors; for sample code that
 	// sends error-level logs to a different location from info- and debug-level
 	// logs, see the package-level AdvancedConfiguration example.
-	ErrorOutput []string `mapstructure:"error_output"`
+	ErrorOutput []string `mapstructure:"err_output"`
 
 	// File logger options
 	FileLogger *FileLoggerConfig `mapstructure:"file_logger_options"`
