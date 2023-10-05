@@ -70,13 +70,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: ./tests/coverage-ci/informer.out
+          path: ./tests/coverage-ci/logger.out
 
   codecov:
     name: Upload codecov
     runs-on: ubuntu-latest
     needs:
-      - informer_test
+      - logger_test
 
     timeout-minutes: 60
     steps:
