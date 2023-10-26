@@ -49,7 +49,7 @@ require (
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/roadrunner-server/api/v4 v4.9.0 // indirect
 	github.com/roadrunner-server/goridge/v3 v3.8.1 // indirect
-	github.com/roadrunner-server/sdk/v4 v4.5.2 // indirect
+	github.com/roadrunner-server/sdk/v4 v4.5.3 // indirect
 	github.com/roadrunner-server/tcplisten v1.4.0 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
