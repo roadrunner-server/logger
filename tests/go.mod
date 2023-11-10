@@ -5,13 +5,13 @@ go 1.21
 toolchain go1.21.1
 
 require (
-	github.com/roadrunner-server/config/v4 v4.6.0
+	github.com/roadrunner-server/config/v4 v4.6.1
 	github.com/roadrunner-server/endure/v2 v2.4.3
 	github.com/roadrunner-server/errors v1.3.0
-	github.com/roadrunner-server/http/v4 v4.4.5
-	github.com/roadrunner-server/logger/v4 v4.2.7
-	github.com/roadrunner-server/rpc/v4 v4.2.8
-	github.com/roadrunner-server/server/v4 v4.4.6
+	github.com/roadrunner-server/http/v4 v4.4.6
+	github.com/roadrunner-server/logger/v4 v4.2.8
+	github.com/roadrunner-server/rpc/v4 v4.2.9
+	github.com/roadrunner-server/server/v4 v4.4.7
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
 )
