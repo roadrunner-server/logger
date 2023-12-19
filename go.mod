@@ -2,7 +2,7 @@ module github.com/roadrunner-server/logger/v4
 
 go 1.21
 
-toolchain go1.21.0
+toolchain go1.21.5
 
 require (
 	github.com/fatih/color v1.16.0
