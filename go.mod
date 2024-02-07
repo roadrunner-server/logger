@@ -1,8 +1,8 @@
 module github.com/roadrunner-server/logger/v4
 
-go 1.21
+go 1.22
 
-toolchain go1.21.5
+toolchain go1.22.0
 
 require (
 	github.com/fatih/color v1.16.0
@@ -19,5 +19,5 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	go.uber.org/goleak v1.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 )
