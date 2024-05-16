@@ -3,7 +3,7 @@ module github.com/roadrunner-server/logger/v4
 go 1.22.3
 
 require (
-	github.com/fatih/color v1.16.0
+	github.com/fatih/color v1.17.0
 	github.com/roadrunner-server/endure/v2 v2.4.4
 	github.com/roadrunner-server/errors v1.4.0
 	go.uber.org/zap v1.27.0
