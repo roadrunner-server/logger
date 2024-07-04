@@ -86,7 +86,7 @@ type Config struct {
 	Output []string `mapstructure:"output"`
 
 	// ErrorOutput is a list of URLs to write internal logger errors to.
-	// The default is standard error.
+	// The default is a standard error.
 	//
 	// Note that this setting only affects internal errors; for sample code that
 	// sends error-level logs to a different location from info- and debug-level

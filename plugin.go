@@ -14,7 +14,7 @@ const PluginName = "logs"
 type Configurer interface {
 	// UnmarshalKey takes a single key and unmarshal it into a Struct.
 	UnmarshalKey(name string, out any) error
-	// Has checks if config section exists.
+	// Has checks if a config section exists.
 	Has(name string) bool
 }
 
@@ -81,12 +81,12 @@ func (p *Plugin) Provides() []*dep.Out {
 	}
 }
 
-// ServiceLogger returns logger dedicated to the specific channel. Similar to Named() but also reads the core params.
+// ServiceLogger returns a logger dedicated to the specific channel. Similar to Named() but also reads the core params.
 func (p *Plugin) ServiceLogger() *Log {
 	return NewLogger(p.channels, p.base)
 }
 
-// Name returns user-friendly plugin name
+// Name returns a user-friendly plugin name
 func (p *Plugin) Name() string {
 	return PluginName
 }
