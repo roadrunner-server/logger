@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/roadrunner-server/config/v4"
+	"github.com/roadrunner-server/config/v5"
 	"github.com/roadrunner-server/endure/v2"
-	httpPlugin "github.com/roadrunner-server/http/v4"
+	httpPlugin "github.com/roadrunner-server/http/v5"
 	"github.com/roadrunner-server/logger/v5"
-	"github.com/roadrunner-server/rpc/v4"
-	"github.com/roadrunner-server/server/v4"
+	"github.com/roadrunner-server/rpc/v5"
+	"github.com/roadrunner-server/server/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -3,13 +3,13 @@ module tests
 go 1.22.5
 
 require (
-	github.com/roadrunner-server/config/v4 v4.9.3
+	github.com/roadrunner-server/config/v5 v5.0.0
 	github.com/roadrunner-server/endure/v2 v2.4.5
 	github.com/roadrunner-server/errors v1.4.0
-	github.com/roadrunner-server/http/v4 v4.7.7
+	github.com/roadrunner-server/http/v5 v5.0.0
 	github.com/roadrunner-server/logger/v5 v5.0.0
-	github.com/roadrunner-server/rpc/v4 v4.4.5
-	github.com/roadrunner-server/server/v4 v4.8.5
+	github.com/roadrunner-server/rpc/v5 v5.0.0
+	github.com/roadrunner-server/server/v5 v5.0.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 )
@@ -54,8 +54,10 @@ require (
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/quic-go v0.45.1 // indirect
 	github.com/roadrunner-server/api/v4 v4.15.0 // indirect
+	github.com/roadrunner-server/context v1.0.0 // indirect
+	github.com/roadrunner-server/events v1.0.0 // indirect
 	github.com/roadrunner-server/goridge/v3 v3.8.2 // indirect
-	github.com/roadrunner-server/sdk/v4 v4.8.0 // indirect
+	github.com/roadrunner-server/pool v1.0.0 // indirect
 	github.com/roadrunner-server/tcplisten v1.5.0 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
@@ -71,6 +73,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
+	github.com/zeebo/assert v1.3.1 // indirect
 	github.com/zeebo/blake3 v0.2.3 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0 // indirect
 	go.opentelemetry.io/contrib/propagators/jaeger v1.28.0 // indirect
