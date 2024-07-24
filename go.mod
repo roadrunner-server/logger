@@ -1,10 +1,12 @@
 module github.com/roadrunner-server/logger/v5
 
-go 1.22.5
+go 1.22
+
+toolchain go1.22.5
 
 require (
 	github.com/fatih/color v1.17.0
-	github.com/roadrunner-server/endure/v2 v2.4.5
+	github.com/roadrunner-server/endure/v2 v2.4.6
 	github.com/roadrunner-server/errors v1.4.0
 	go.uber.org/zap v1.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1

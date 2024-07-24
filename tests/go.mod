@@ -4,7 +4,7 @@ go 1.22.5
 
 require (
 	github.com/roadrunner-server/config/v5 v5.0.0
-	github.com/roadrunner-server/endure/v2 v2.4.5
+	github.com/roadrunner-server/endure/v2 v2.4.6
 	github.com/roadrunner-server/errors v1.4.0
 	github.com/roadrunner-server/http/v5 v5.0.0
 	github.com/roadrunner-server/logger/v5 v5.0.0
