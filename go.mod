@@ -7,7 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/fatih/color v1.17.0
 	github.com/roadrunner-server/endure/v2 v2.4.6
-	github.com/roadrunner-server/errors v1.4.0
+	github.com/roadrunner-server/errors v1.4.1
 	go.uber.org/zap v1.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
