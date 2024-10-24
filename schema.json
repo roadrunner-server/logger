@@ -24,6 +24,9 @@
     "err_output": {
       "$ref": "#/$defs/LogOutput"
     },
+    "file_logger_options": {
+      "$ref": "#/$defs/FileLoggerOptions"
+    },
     "channels": {
       "description": "You can configure logging for each plugin individually. The key is the plugin name and the value is logging options in same format as the parent.",
       "type": "object",
@@ -48,11 +51,16 @@
           },
           "err_output": {
             "$ref": "#/$defs/LogOutput"
+          },
+          "file_logger_options": {
+            "$ref": "#/$defs/FileLoggerOptions"
           }
         }
       }
-    },
-    "file_logger_options": {
+    }
+  },
+  "$defs": {
+    "FileLoggerOptions": {
       "description": "File logger options.",
       "type": "object",
       "additionalProperties": false,
@@ -85,9 +93,7 @@
           "default": false
         }
       }
-    }
-  },
-  "$defs": {
+    },
     "LogMode": {
       "description": "Logging mode",
       "type": "string",
