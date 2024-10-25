@@ -30,10 +30,10 @@
     "channels": {
       "description": "You can configure logging for each plugin individually. The key is the plugin name and the value is logging options in same format as the parent.",
       "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-zA-Z0-9._-]+$": {
           "mode": {
             "$ref": "#/$defs/LogMode"
           },
