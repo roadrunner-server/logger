@@ -4,6 +4,7 @@
   "description": "All the valid configuration parameters for the Logger plugin for RoadRunner.",
   "type": "object",
   "title": "roadrunner-logger",
+  "minProperties": 1,
   "additionalProperties": false,
   "properties": {
     "mode": {
@@ -34,26 +35,32 @@
       "minProperties": 1,
       "patternProperties": {
         "^[a-zA-Z0-9._-]+$": {
-          "mode": {
-            "$ref": "#/$defs/LogMode"
-          },
-          "level": {
-            "$ref": "#/$defs/LogLevel"
-          },
-          "line_ending": {
-            "$ref": "#/$defs/LogLineEnding"
-          },
-          "encoding": {
-            "$ref": "#/$defs/LogEncoding"
-          },
-          "output": {
-            "$ref": "#/$defs/LogOutput"
-          },
-          "err_output": {
-            "$ref": "#/$defs/LogOutput"
-          },
-          "file_logger_options": {
-            "$ref": "#/$defs/FileLoggerOptions"
+          "description": "Custom logging options for the plugin specified as this object's key.",
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "mode": {
+              "$ref": "#/$defs/LogMode"
+            },
+            "level": {
+              "$ref": "#/$defs/LogLevel"
+            },
+            "line_ending": {
+              "$ref": "#/$defs/LogLineEnding"
+            },
+            "encoding": {
+              "$ref": "#/$defs/LogEncoding"
+            },
+            "output": {
+              "$ref": "#/$defs/LogOutput"
+            },
+            "err_output": {
+              "$ref": "#/$defs/LogOutput"
+            },
+            "file_logger_options": {
+              "$ref": "#/$defs/FileLoggerOptions"
+            }
           }
         }
       }
