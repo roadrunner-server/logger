@@ -1,0 +1,147 @@
+{
+  "$id": "https://raw.githubusercontent.com/roadrunner-server/logger/refs/heads/master/schema.json",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "description": "All the valid configuration parameters for the Logger plugin for RoadRunner.",
+  "type": "object",
+  "title": "roadrunner-logger",
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "$ref": "#/$defs/LogMode"
+    },
+    "level": {
+      "$ref": "#/$defs/LogLevel"
+    },
+    "line_ending": {
+      "$ref": "#/$defs/LogLineEnding"
+    },
+    "encoding": {
+      "$ref": "#/$defs/LogEncoding"
+    },
+    "output": {
+      "$ref": "#/$defs/LogOutput"
+    },
+    "err_output": {
+      "$ref": "#/$defs/LogOutput"
+    },
+    "file_logger_options": {
+      "$ref": "#/$defs/FileLoggerOptions"
+    },
+    "channels": {
+      "description": "You can configure logging for each plugin individually. The key is the plugin name and the value is logging options in same format as the parent.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-zA-Z0-9._-]+$": {
+          "mode": {
+            "$ref": "#/$defs/LogMode"
+          },
+          "level": {
+            "$ref": "#/$defs/LogLevel"
+          },
+          "line_ending": {
+            "$ref": "#/$defs/LogLineEnding"
+          },
+          "encoding": {
+            "$ref": "#/$defs/LogEncoding"
+          },
+          "output": {
+            "$ref": "#/$defs/LogOutput"
+          },
+          "err_output": {
+            "$ref": "#/$defs/LogOutput"
+          },
+          "file_logger_options": {
+            "$ref": "#/$defs/FileLoggerOptions"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "FileLoggerOptions": {
+      "description": "File logger options.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "log_output": {
+          "type": "string",
+          "description": "Path to the log file. Uses <processname>-lumberjack.log and the OS temp (i.e. `/tmp`) directory if empty."
+        },
+        "max_size": {
+          "type": "integer",
+          "description": "Maximum file size in MB.",
+          "minimum": 0,
+          "default": 100
+        },
+        "max_age": {
+          "type": "integer",
+          "description": "The maximum number of days to retain old log files based on the timestamp encoded in their filename. Empty or zero defaults to 24 days.",
+          "minimum": 0,
+          "default": 24
+        },
+        "max_backups": {
+          "type": "integer",
+          "description": "The maximum number of old log files to retain. Empty or zero defaults to 10.",
+          "minimum": 0,
+          "default": 10
+        },
+        "compress": {
+          "type": "boolean",
+          "description": "Whether to compress log files.",
+          "default": false
+        }
+      }
+    },
+    "LogMode": {
+      "description": "Logging mode",
+      "type": "string",
+      "default": "development",
+      "enum": [
+        "none",
+        "off",
+        "production",
+        "development",
+        "raw"
+      ]
+    },
+    "LogLevel": {
+      "description": "Logging level",
+      "type": "string",
+      "default": "debug",
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "panic"
+      ]
+    },
+    "LogEncoding": {
+      "description": "Encoding format. Default depends on logging mode. For production, `json` is the default, else `console`. Also supports any third-party encodings registered via RegisterEncoder.",
+      "type": "string",
+      "enum": [
+        "console",
+        "json"
+      ]
+    },
+    "LogOutput": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "examples": [
+          "stdout",
+          "stderr",
+          "/var/log/rr_errors.log"
+        ]
+      }
+    },
+    "LogLineEnding": {
+      "description": "Line-ending to use for logging.",
+      "type": "string",
+      "default": "\n"
+    }
+  }
+}
