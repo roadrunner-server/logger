@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -106,9 +107,11 @@ type Config struct {
 // BuildLogger converts config into Zap configuration.
 func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 	var zCfg zap.Config
-	callerKey := zapcore.OmitKey
+	var callerKey = zapcore.OmitKey
+	var encodeCaller zapcore.CallerEncoder = nil
 	if cfg.ShowCaller {
 		callerKey = "caller"
+		encodeCaller = ColoredShortCallerEncoder
 	}
 	switch Mode(strings.ToLower(string(cfg.Mode))) {
 	case off, none:
@@ -134,7 +137,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				EncodeLevel:    zapcore.LowercaseLevelEncoder,
 				EncodeTime:     encodeTime,
 				EncodeDuration: zapcore.SecondsDurationEncoder,
-				EncodeCaller:   zapcore.ShortCallerEncoder,
+				EncodeCaller:   encodeCaller,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
@@ -161,7 +164,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				EncodeName:     ColoredNameEncoder,
 				EncodeTime:     encodeTime,
 				EncodeDuration: zapcore.StringDurationEncoder,
-				EncodeCaller:   zapcore.ShortCallerEncoder,
+				EncodeCaller:   encodeCaller,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
@@ -198,7 +201,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				EncodeName:     ColoredNameEncoder,
 				EncodeTime:     encodeTime,
 				EncodeDuration: zapcore.StringDurationEncoder,
-				EncodeCaller:   zapcore.ShortCallerEncoder,
+				EncodeCaller:   encodeCaller,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
@@ -228,6 +231,11 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 	// init it
 	// otherwise - return standard config
 	if cfg.FileLogger != nil {
+		fileEncoderConfig := zCfg.EncoderConfig
+		if cfg.ShowCaller {
+			fileEncoderConfig.EncodeCaller = ShortCallerEncoderWithPadding
+		}
+
 		// init absent options
 		cfg.FileLogger.InitDefaults()
 
@@ -242,7 +250,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 		)
 
 		core := zapcore.NewCore(
-			zapcore.NewJSONEncoder(zCfg.EncoderConfig),
+			zapcore.NewJSONEncoder(fileEncoderConfig),
 			w,
 			zCfg.Level,
 		)
@@ -279,4 +287,12 @@ func utcEpochTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 
 func localTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Local().Format("2006-01-02 15:04:05.000"))
+}
+
+func ColoredShortCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(fmt.Sprintf("\x1b[35m%-40s\x1b[0m", caller.TrimmedPath()))
+}
+
+func ShortCallerEncoderWithPadding(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(fmt.Sprintf("%-40s", caller.TrimmedPath()))
 }
