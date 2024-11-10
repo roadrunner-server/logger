@@ -96,8 +96,8 @@ type Config struct {
 	// File logger options
 	FileLogger *FileLoggerConfig `mapstructure:"file_logger_options"`
 
-	// UseLocalTimeEncoder is used to set the encoder to use local time instead of UTC.
-	UseLocalTimeEncoder bool `mapstructure:"use_local_time_encoder"`
+	// UseLocalTime is used to set the encoder to use local time instead of UTC.
+	UseLocalTime bool `mapstructure:"use_local_time"`
 
 	// ShowCaller is used to set the encoder to show the caller.
 	ShowCaller bool `mapstructure:"show_caller"`
@@ -115,7 +115,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 		return zap.NewNop(), nil
 	case production:
 		encodeTime := utcEpochTimeEncoder
-		if cfg.UseLocalTimeEncoder {
+		if cfg.UseLocalTime {
 			encodeTime = localTimeEncoder
 		}
 		zCfg = zap.Config{
@@ -141,7 +141,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 		}
 	case development:
 		encodeTime := utcISO8601TimeEncoder
-		if cfg.UseLocalTimeEncoder {
+		if cfg.UseLocalTime {
 			encodeTime = localTimeEncoder
 		}
 		zCfg = zap.Config{
@@ -179,7 +179,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 		}
 	default:
 		encodeTime := utcISO8601TimeEncoder
-		if cfg.UseLocalTimeEncoder {
+		if cfg.UseLocalTime {
 			encodeTime = localTimeEncoder
 		}
 		zCfg = zap.Config{
@@ -246,6 +246,9 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 			w,
 			zCfg.Level,
 		)
+		if cfg.ShowCaller {
+			return zap.New(core, zap.AddCaller()), nil
+		}
 		return zap.New(core), nil
 	}
 
