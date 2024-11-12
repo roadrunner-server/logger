@@ -286,7 +286,7 @@ func utcEpochTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 }
 
 func localTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(t.Local().Format("2006-01-02 15:04:05.000"))
+	enc.AppendString(t.Local().Format("2006-01-02 15:04:05.000 "))
 }
 
 func ColoredShortCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
