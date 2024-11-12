@@ -290,9 +290,9 @@ func localTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 }
 
 func ColoredShortCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(fmt.Sprintf("\x1b[35m%-40s\x1b[0m", caller.TrimmedPath()))
+	enc.AppendString(fmt.Sprintf("\x1b[35m%-30s\x1b[0m", caller.TrimmedPath()))
 }
 
 func ShortCallerEncoderWithPadding(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(fmt.Sprintf("%s", caller.TrimmedPath()))
+	enc.AppendString(fmt.Sprintf("%-30s", caller.TrimmedPath()))
 }
