@@ -294,5 +294,5 @@ func ColoredShortCallerEncoder(caller zapcore.EntryCaller, enc zapcore.Primitive
 }
 
 func ShortCallerEncoderWithPadding(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(fmt.Sprintf("%-30s", caller.TrimmedPath()))
+	enc.AppendString(fmt.Sprintf("%s", caller.TrimmedPath()))
 }
