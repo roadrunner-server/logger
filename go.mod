@@ -1,4 +1,4 @@
-module github.com/shellphy/logger/v5
+module github.com/roadrunner-server/logger/v5
 
 go 1.23
 
