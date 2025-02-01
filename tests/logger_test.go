@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"sync"
 	"syscall"
@@ -336,6 +337,16 @@ func TestFileLogger(t *testing.T) {
 
 	strings.Contains(string(f), "worker constructed")
 	strings.Contains(string(f), "201 GET")
+
+	// when use_local_time=true, check local time format
+	matched, err := regexp.MatchString(`\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}`, string(f))
+	assert.NoError(t, err)
+	assert.True(t, matched)
+
+	// when show_caller=true, check caller info
+	callerMatched, err := regexp.MatchString(`\w+\.go:\d+`, string(f))
+	assert.NoError(t, err)
+	assert.True(t, callerMatched)
 
 	_ = os.Remove("test.log")
 
