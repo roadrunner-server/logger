@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -95,15 +96,31 @@ type Config struct {
 
 	// File logger options
 	FileLogger *FileLoggerConfig `mapstructure:"file_logger_options"`
+
+	// UseLocalTime is used to set the encoder to use local time instead of UTC.
+	UseLocalTime bool `mapstructure:"use_local_time"`
+
+	// ShowCaller is used to set the encoder to show the caller.
+	ShowCaller bool `mapstructure:"show_caller"`
 }
 
 // BuildLogger converts config into Zap configuration.
 func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 	var zCfg zap.Config
+	var callerKey = zapcore.OmitKey
+	var encodeCaller zapcore.CallerEncoder = nil
+	if cfg.ShowCaller {
+		callerKey = "caller"
+		encodeCaller = ColoredShortCallerEncoder
+	}
 	switch Mode(strings.ToLower(string(cfg.Mode))) {
 	case off, none:
 		return zap.NewNop(), nil
 	case production:
+		encodeTime := utcEpochTimeEncoder
+		if cfg.UseLocalTime {
+			encodeTime = localTimeEncoder
+		}
 		zCfg = zap.Config{
 			Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
 			Development: false,
@@ -112,20 +129,24 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				TimeKey:        "ts",
 				LevelKey:       "level",
 				NameKey:        "logger",
-				CallerKey:      zapcore.OmitKey,
+				CallerKey:      callerKey,
 				FunctionKey:    zapcore.OmitKey,
 				MessageKey:     "msg",
 				StacktraceKey:  zapcore.OmitKey,
 				LineEnding:     cfg.LineEnding,
 				EncodeLevel:    zapcore.LowercaseLevelEncoder,
-				EncodeTime:     utcEpochTimeEncoder,
+				EncodeTime:     encodeTime,
 				EncodeDuration: zapcore.SecondsDurationEncoder,
-				EncodeCaller:   zapcore.ShortCallerEncoder,
+				EncodeCaller:   encodeCaller,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
 		}
 	case development:
+		encodeTime := utcISO8601TimeEncoder
+		if cfg.UseLocalTime {
+			encodeTime = localTimeEncoder
+		}
 		zCfg = zap.Config{
 			Level:       zap.NewAtomicLevelAt(zap.DebugLevel),
 			Development: true,
@@ -134,16 +155,16 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				TimeKey:        "ts",
 				LevelKey:       "level",
 				NameKey:        "logger",
-				CallerKey:      zapcore.OmitKey,
+				CallerKey:      callerKey,
 				FunctionKey:    zapcore.OmitKey,
 				MessageKey:     "msg",
 				StacktraceKey:  zapcore.OmitKey,
 				LineEnding:     cfg.LineEnding,
 				EncodeLevel:    ColoredLevelEncoder,
 				EncodeName:     ColoredNameEncoder,
-				EncodeTime:     utcISO8601TimeEncoder,
+				EncodeTime:     encodeTime,
 				EncodeDuration: zapcore.StringDurationEncoder,
-				EncodeCaller:   zapcore.ShortCallerEncoder,
+				EncodeCaller:   encodeCaller,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
@@ -160,6 +181,10 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 			ErrorOutputPaths: []string{"stderr"},
 		}
 	default:
+		encodeTime := utcISO8601TimeEncoder
+		if cfg.UseLocalTime {
+			encodeTime = localTimeEncoder
+		}
 		zCfg = zap.Config{
 			Level:    zap.NewAtomicLevelAt(zap.DebugLevel),
 			Encoding: "console",
@@ -167,16 +192,16 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				TimeKey:        "T",
 				LevelKey:       "L",
 				NameKey:        "N",
-				CallerKey:      zapcore.OmitKey,
+				CallerKey:      callerKey,
 				FunctionKey:    zapcore.OmitKey,
 				MessageKey:     "M",
 				StacktraceKey:  zapcore.OmitKey,
 				LineEnding:     cfg.LineEnding,
 				EncodeLevel:    ColoredLevelEncoder,
 				EncodeName:     ColoredNameEncoder,
-				EncodeTime:     utcISO8601TimeEncoder,
+				EncodeTime:     encodeTime,
 				EncodeDuration: zapcore.StringDurationEncoder,
-				EncodeCaller:   zapcore.ShortCallerEncoder,
+				EncodeCaller:   encodeCaller,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
@@ -206,6 +231,11 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 	// init it
 	// otherwise - return standard config
 	if cfg.FileLogger != nil {
+		fileEncoderConfig := zCfg.EncoderConfig
+		if cfg.ShowCaller {
+			fileEncoderConfig.EncodeCaller = ShortCallerEncoderWithPadding
+		}
+
 		// init absent options
 		cfg.FileLogger.InitDefaults()
 
@@ -220,10 +250,13 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 		)
 
 		core := zapcore.NewCore(
-			zapcore.NewJSONEncoder(zCfg.EncoderConfig),
+			zapcore.NewJSONEncoder(fileEncoderConfig),
 			w,
 			zCfg.Level,
 		)
+		if cfg.ShowCaller {
+			return zap.New(core, zap.AddCaller()), nil
+		}
 		return zap.New(core), nil
 	}
 
@@ -250,4 +283,16 @@ func utcISO8601TimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 
 func utcEpochTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendInt64(t.UTC().UnixNano())
+}
+
+func localTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.Local().Format("2006-01-02 15:04:05.000 "))
+}
+
+func ColoredShortCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(fmt.Sprintf("\x1b[35m%-30s\x1b[0m", caller.TrimmedPath()))
+}
+
+func ShortCallerEncoderWithPadding(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(fmt.Sprintf("%-30s", caller.TrimmedPath()))
 }
