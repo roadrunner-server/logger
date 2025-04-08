@@ -21,5 +21,7 @@ http:
 logs:
   mode: development
   level: debug
+  use_local_time: true
+  show_caller: true
   file_logger_options:
     log_output: "test.log"
