@@ -244,17 +244,6 @@ func (cfg *Config) InitDefault() {
 	if cfg.Level == "" {
 		cfg.Level = "debug"
 	}
-
-	// Configure line ending behavior:
-	// - If LineEnding is empty and SkipLineEnding is false (default case), use default line ending ("\n")
-	// - Otherwise, skip line ending by setting SkipLineEnding to true and clearing LineEnding
-	if cfg.LineEnding == "" && !cfg.SkipLineEnding {
-		cfg.LineEnding = zapcore.DefaultLineEnding
-	} else {
-		// should be already true, but just in case
-		cfg.SkipLineEnding = true
-		cfg.LineEnding = ""
-	}
 }
 
 func utcISO8601TimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
