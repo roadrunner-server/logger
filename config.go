@@ -76,6 +76,9 @@ type Config struct {
 	// Logger line ending. Default: "\n" for the all modes except production
 	LineEnding string `mapstructure:"line_ending"`
 
+	// SkipLineEnding determines if the logger should skip appending the default line ending to each log entry.
+	SkipLineEnding bool `mapstructure:"skip_line_ending"`
+
 	// Encoding sets the logger's encoding. InitDefault values are "json" and
 	// "console", as well as any third-party encodings registered via
 	// RegisterEncoder.
@@ -117,6 +120,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				MessageKey:     "msg",
 				StacktraceKey:  zapcore.OmitKey,
 				LineEnding:     cfg.LineEnding,
+				SkipLineEnding: cfg.SkipLineEnding,
 				EncodeLevel:    zapcore.LowercaseLevelEncoder,
 				EncodeTime:     utcEpochTimeEncoder,
 				EncodeDuration: zapcore.SecondsDurationEncoder,
@@ -139,6 +143,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				MessageKey:     "msg",
 				StacktraceKey:  zapcore.OmitKey,
 				LineEnding:     cfg.LineEnding,
+				SkipLineEnding: cfg.SkipLineEnding,
 				EncodeLevel:    ColoredLevelEncoder,
 				EncodeName:     ColoredNameEncoder,
 				EncodeTime:     utcISO8601TimeEncoder,
@@ -153,8 +158,9 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 			Level:    zap.NewAtomicLevelAt(zap.InfoLevel),
 			Encoding: "console",
 			EncoderConfig: zapcore.EncoderConfig{
-				MessageKey: "message",
-				LineEnding: cfg.LineEnding,
+				MessageKey:     "message",
+				LineEnding:     cfg.LineEnding,
+				SkipLineEnding: cfg.SkipLineEnding,
 			},
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
@@ -172,6 +178,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 				MessageKey:     "M",
 				StacktraceKey:  zapcore.OmitKey,
 				LineEnding:     cfg.LineEnding,
+				SkipLineEnding: cfg.SkipLineEnding,
 				EncodeLevel:    ColoredLevelEncoder,
 				EncodeName:     ColoredNameEncoder,
 				EncodeTime:     utcISO8601TimeEncoder,
@@ -202,8 +209,7 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 		zCfg.ErrorOutputPaths = cfg.ErrorOutput
 	}
 
-	// if we also have a file logger specified in the config
-	// init it
+	// if we also have a file logger specified in the config, init it
 	// otherwise - return standard config
 	if cfg.FileLogger != nil {
 		// init absent options
@@ -237,10 +243,6 @@ func (cfg *Config) InitDefault() {
 	}
 	if cfg.Level == "" {
 		cfg.Level = "debug"
-	}
-
-	if cfg.LineEnding == "" {
-		cfg.LineEnding = zapcore.DefaultLineEnding
 	}
 }
 
