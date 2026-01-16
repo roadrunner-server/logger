@@ -88,6 +88,8 @@ type Config struct {
 	// See Open for details.
 	Output []string `mapstructure:"output"`
 
+	Format string `mapstructure:"format"`
+
 	// ErrorOutput is a list of URLs to write internal logger errors to.
 	// The default is a standard error.
 	//
@@ -199,6 +201,19 @@ func (cfg *Config) BuildLogger() (*zap.Logger, error) {
 
 	if cfg.Encoding != "" {
 		zCfg.Encoding = cfg.Encoding
+	}
+
+	if cfg.Format != "" {
+		err := zap.RegisterEncoder("custom-format", func(config zapcore.EncoderConfig) (zapcore.Encoder, error) {
+			return &customFormatEncoder{
+				Encoder: zapcore.NewConsoleEncoder(config),
+				format:  cfg.Format,
+			}, nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		zCfg.Encoding = "custom-format"
 	}
 
 	if len(cfg.Output) != 0 {
