@@ -2,11 +2,10 @@ package logger
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 
 	"github.com/roadrunner-server/errors"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 type Configurer interface {
@@ -17,19 +16,12 @@ type Configurer interface {
 }
 
 type Logger interface {
-	NamedLogger(name string) *zap.Logger
+	NamedLogger(name string) *slog.Logger
 }
 
 type TestPlugin struct {
 	config Configurer
-	log    *zap.Logger
-}
-
-type Loggable struct{}
-
-func (l *Loggable) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
-	encoder.AddString("error", "Example marshaller error")
-	return nil
+	log    *slog.Logger
 }
 
 func (p1 *TestPlugin) Init(cfg Configurer, log Logger) error {
@@ -40,29 +32,25 @@ func (p1 *TestPlugin) Init(cfg Configurer, log Logger) error {
 
 func (p1 *TestPlugin) Serve() chan error {
 	errCh := make(chan error, 1)
-	p1.log.Error("error", zap.Error(errors.E(errors.Str("test"))))
-	p1.log.Info("error", zap.Error(errors.E(errors.Str("test"))))
-	p1.log.Debug("error", zap.Error(errors.E(errors.Str("test"))))
-	p1.log.Warn("error", zap.Error(errors.E(errors.Str("test"))))
+	p1.log.Error("error", slog.Any("error", errors.E(errors.Str("test"))))
+	p1.log.Info("error", slog.Any("error", errors.E(errors.Str("test"))))
+	p1.log.Debug("error", slog.Any("error", errors.E(errors.Str("test"))))
+	p1.log.Warn("error", slog.Any("error", errors.E(errors.Str("test"))))
 
-	field := zap.String("error", "Example field error")
+	p1.log.Error("error", slog.String("error", "Example field error"))
+	p1.log.Info("error", slog.String("error", "Example field error"))
+	p1.log.Debug("error", slog.String("error", "Example field error"))
+	p1.log.Warn("error", slog.String("error", "Example field error"))
 
-	p1.log.Error("error", field)
-	p1.log.Info("error", field)
-	p1.log.Debug("error", field)
-	p1.log.Warn("error", field)
+	p1.log.Error("error", slog.Any("object", map[string]string{"error": "Example marshaller error"}))
+	p1.log.Info("error", slog.Any("object", map[string]string{"error": "Example marshaller error"}))
+	p1.log.Debug("error", slog.Any("object", map[string]string{"error": "Example marshaller error"}))
+	p1.log.Warn("error", slog.Any("object", map[string]string{"error": "Example marshaller error"}))
 
-	marshalledObject := &Loggable{}
-
-	p1.log.Error("error", zap.Any("object", marshalledObject))
-	p1.log.Info("error", zap.Any("object", marshalledObject))
-	p1.log.Debug("error", zap.Any("object", marshalledObject))
-	p1.log.Warn("error", zap.Any("object", marshalledObject))
-
-	p1.log.Error("error", zap.String("test", ""))
-	p1.log.Info("error", zap.String("test", ""))
-	p1.log.Debug("error", zap.String("test", ""))
-	p1.log.Warn("error", zap.String("test", ""))
+	p1.log.Error("error", slog.String("test", ""))
+	p1.log.Info("error", slog.String("test", ""))
+	p1.log.Debug("error", slog.String("test", ""))
+	p1.log.Warn("error", slog.String("test", ""))
 
 	// test the `raw` mode
 	messageJSON := []byte(`{"field": "value"}`)

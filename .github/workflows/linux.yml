@@ -17,9 +17,9 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        php: [ "8.4" ]
-        go: [ stable ]
-        os: [ "ubuntu-latest" ]
+        php: ["8.5"]
+        go: [stable]
+        os: ["ubuntu-latest"]
     steps:
       - name: Set up Go ${{ matrix.go }}
         uses: actions/setup-go@v6 # action page: <https://github.com/actions/setup-go>
@@ -65,32 +65,42 @@ jobs:
         run: |
           cd tests
           mkdir ./coverage-ci
-
-          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat pkgs.txt) -coverprofile=./coverage-ci/logger.out -covermode=atomic ./...
+          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=./... -coverprofile=./coverage-ci/logger.out -covermode=atomic ./...
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
-          path: ./tests/coverage-ci/logger.out
+          path: ./tests/coverage-ci
 
   codecov:
     name: Upload codecov
     runs-on: ubuntu-latest
     needs:
       - logger_test
-
     timeout-minutes: 60
     steps:
+      - name: Check out code
+        uses: actions/checkout@v6
       - name: Download code coverage results
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
+        with:
+          pattern: coverage*
+          path: coverage
+          merge-multiple: true
       - run: |
           echo 'mode: atomic' > summary.txt
-          tail -q -n +2 *.out >> summary.txt
-          sed -i '2,${/roadrunner/!d}' summary.txt
-
+          tail -q -n +2 coverage/*.out >> summary.txt
+          awk '
+            NR == 1 { print; next }
+            /^github\.com\/roadrunner-server\/logger\/v6\// {
+              sub(/^github\.com\/roadrunner-server\/logger\/v6\//, "", $0)
+              print
+            }
+          ' summary.txt > summary.filtered.txt
+          mv summary.filtered.txt summary.txt
       - name: upload to codecov
-        uses: codecov/codecov-action@v5 # Docs: <https://github.com/codecov/codecov-action>
+        uses: codecov/codecov-action@v5
         with:
           files: summary.txt
           fail_ci_if_error: false

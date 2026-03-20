@@ -121,8 +121,7 @@
         "debug",
         "info",
         "warn",
-        "error",
-        "panic"
+        "error"
       ]
     },
     "LogEncoding": {
