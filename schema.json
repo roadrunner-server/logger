@@ -25,6 +25,12 @@
     "err_output": {
       "$ref": "#/$defs/LogOutput"
     },
+    "format": {
+      "$ref": "#/$defs/LogFormat"
+    },
+    "time_format": {
+      "$ref": "#/$defs/LogTimeFormat"
+    },
     "file_logger_options": {
       "$ref": "#/$defs/FileLoggerOptions"
     },
@@ -57,6 +63,12 @@
             },
             "err_output": {
               "$ref": "#/$defs/LogOutput"
+            },
+            "format": {
+              "$ref": "#/$defs/LogFormat"
+            },
+            "time_format": {
+              "$ref": "#/$defs/LogTimeFormat"
             },
             "file_logger_options": {
               "$ref": "#/$defs/FileLoggerOptions"
@@ -148,6 +160,18 @@
       "description": "Line-ending to use for logging.",
       "type": "string",
       "default": "\n"
+    },
+    "LogFormat": {
+      "description": "Custom log format with %placeholder% tokens (e.g. \"%time% [%level%] %message% %attrs%\"). Overrides mode when set. Supported: %time%, %level%, %message%, %attrs%, %logger%, %source_file%, %source_line%, %source_func%.",
+      "type": "string"
+    },
+    "LogTimeFormat": {
+      "description": "Go time layout for the %time% placeholder in a custom format string. Defaults to RFC3339.",
+      "type": "string",
+      "examples": [
+        "2006-01-02 15:04:05",
+        "15:04:05"
+      ]
     }
   }
 }

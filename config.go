@@ -44,6 +44,19 @@ type FileLoggerConfig struct {
 	Compress bool `mapstructure:"compress"`
 }
 
+// NewLumberjack creates a configured [lumberjack.Logger] from the file logger
+// settings, calling [InitDefaults] first to fill zero-value fields.
+func (fl *FileLoggerConfig) NewLumberjack() *lumberjack.Logger {
+	fl.InitDefaults()
+	return &lumberjack.Logger{
+		Filename:   fl.LogOutput,
+		MaxSize:    fl.MaxSize,
+		MaxAge:     fl.MaxAge,
+		MaxBackups: fl.MaxBackups,
+		Compress:   fl.Compress,
+	}
+}
+
 // InitDefaults fills zero-value fields with sensible defaults.
 func (fl *FileLoggerConfig) InitDefaults() *FileLoggerConfig {
 	if fl.LogOutput == "" {
@@ -69,6 +82,15 @@ type Config struct {
 
 	// Level is the minimum enabled logging level.
 	Level string `mapstructure:"level"`
+
+	// Format is a custom format string with %placeholder% tokens (e.g.
+	// "%time% [%level%] %message% %attrs%"). When set, it overrides Mode for
+	// handler selection.
+	Format string `mapstructure:"format"`
+
+	// TimeFormat is a Go time layout used for the %time% placeholder in a
+	// custom format string. Defaults to [time.RFC3339].
+	TimeFormat string `mapstructure:"time_format"`
 
 	// LineEnding for log entries. Default: "\n".
 	LineEnding string `mapstructure:"line_ending"`
@@ -120,18 +142,29 @@ func (cfg *Config) BuildLogger() (*BuildResult, error) {
 		return nil, errors.E(op, err)
 	}
 
-	// File Logger: use lumberjack writer with JSON handler.
-	if cfg.FileLogger != nil {
-		cfg.FileLogger.InitDefaults()
-
-		lj := &lumberjack.Logger{
-			Filename:   cfg.FileLogger.LogOutput,
-			MaxSize:    cfg.FileLogger.MaxSize,
-			MaxAge:     cfg.FileLogger.MaxAge,
-			MaxBackups: cfg.FileLogger.MaxBackups,
-			Compress:   cfg.FileLogger.Compress,
+	// Custom format: build a FormatHandler instead of mode-based handlers.
+	if cfg.Format != "" {
+		targetWriter := w
+		if cfg.FileLogger != nil {
+			lj := cfg.FileLogger.NewLumberjack()
+			closers = append(closers, lj)
+			targetWriter = lj
 		}
 
+		return &BuildResult{
+			Logger: slog.New(NewFormatHandler(targetWriter, &FormatHandlerOptions{
+				Level:      level,
+				Format:     cfg.Format,
+				TimeLayout: cfg.TimeFormat,
+				LineEnding: new(cfg.lineEnding()),
+			})),
+			Closers: closers,
+		}, nil
+	}
+
+	// File Logger: use lumberjack writer with JSON handler.
+	if cfg.FileLogger != nil {
+		lj := cfg.FileLogger.NewLumberjack()
 		closers = append(closers, lj)
 
 		return &BuildResult{
@@ -208,6 +241,18 @@ func (cfg *Config) resolveOutputWriter() (io.Writer, []io.Closer, error) {
 		return writers[0], closers, nil
 	}
 	return io.MultiWriter(writers...), closers, nil
+}
+
+// lineEnding returns the effective line ending for log entries, respecting the
+// SkipLineEnding and LineEnding configuration fields.
+func (cfg *Config) lineEnding() string {
+	if cfg.SkipLineEnding {
+		return ""
+	}
+	if cfg.LineEnding != "" {
+		return cfg.LineEnding
+	}
+	return "\n"
 }
 
 // parseLevel converts a level string to the corresponding [slog.Level].
