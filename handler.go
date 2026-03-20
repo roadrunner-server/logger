@@ -52,24 +52,3 @@ func (h *RawHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
 
 // WithGroup returns the same handler — raw mode discards groups.
 func (h *RawHandler) WithGroup(string) slog.Handler { return h }
-
-// newJSONHandler creates a [slog.JSONHandler] configured for production output.
-// Keys are remapped: time → ts (Unix epoch nanoseconds), level stays lowercase,
-// message → msg.
-func newJSONHandler(w io.Writer, level slog.Leveler) slog.Handler {
-	return slog.NewJSONHandler(w, &slog.HandlerOptions{
-		Level: level,
-		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
-			switch a.Key {
-			case slog.TimeKey:
-				a.Key = "ts"
-				a.Value = slog.Int64Value(a.Value.Time().UnixNano())
-			case slog.LevelKey:
-				a.Value = slog.StringValue(strings.ToLower(a.Value.String()))
-			case slog.MessageKey:
-				a.Key = "msg"
-			}
-			return a
-		},
-	})
-}

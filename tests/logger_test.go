@@ -22,14 +22,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const cfgPrefix = "rr"
-
 func TestLogger(t *testing.T) {
 	container := endure.New(slog.LevelDebug)
 
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr.yaml"
-	vp.Prefix = cfgPrefix //nolint:staticcheck // Prefix is deprecated but still required by config/v5
 
 	err := container.RegisterAll(
 		vp,
@@ -83,7 +80,6 @@ func TestLoggerRawErr(t *testing.T) {
 		Version: "2025.1.11",
 		Path:    "configs/.rr-raw-mode.yaml",
 	}
-	cfg.Prefix = cfgPrefix //nolint:staticcheck // Prefix is deprecated but still required by config/v5
 
 	err := cont.RegisterAll(
 		cfg,
@@ -155,7 +151,6 @@ func TestLoggerNoConfig(t *testing.T) {
 
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr-no-logger.yaml"
-	vp.Prefix = cfgPrefix //nolint:staticcheck // Prefix is deprecated but still required by config/v5
 
 	err := container.RegisterAll(
 		vp,
@@ -209,7 +204,6 @@ func TestLoggerNoConfig2(t *testing.T) {
 
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr-no-logger2.yaml"
-	vp.Prefix = cfgPrefix //nolint:staticcheck // Prefix is deprecated but still required by config/v5
 
 	err := container.RegisterAll(
 		vp,
@@ -263,7 +257,6 @@ func TestFileLogger(t *testing.T) {
 
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr-file-logger.yaml"
-	vp.Prefix = cfgPrefix //nolint:staticcheck // Prefix is deprecated but still required by config/v5
 
 	err := container.RegisterAll(
 		vp,
@@ -343,7 +336,6 @@ func TestMarshalObjectLogging(t *testing.T) {
 
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr-file-logger.yaml"
-	vp.Prefix = cfgPrefix //nolint:staticcheck // Prefix is deprecated but still required by config/v5
 
 	err := container.RegisterAll(
 		vp,

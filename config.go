@@ -135,7 +135,7 @@ func (cfg *Config) BuildLogger() (*BuildResult, error) {
 		closers = append(closers, lj)
 
 		return &BuildResult{
-			Logger:  slog.New(newJSONHandler(lj, level)),
+			Logger:  slog.New(slog.NewJSONHandler(lj, &slog.HandlerOptions{Level: level})),
 			Closers: closers,
 		}, nil
 	}
@@ -143,7 +143,7 @@ func (cfg *Config) BuildLogger() (*BuildResult, error) {
 	var handler slog.Handler
 	switch mode {
 	case production:
-		handler = newJSONHandler(w, level)
+		handler = slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level})
 	case raw:
 		handler = NewRawHandler(w, level)
 	case off, none:
