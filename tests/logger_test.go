@@ -15,7 +15,7 @@ import (
 	"github.com/roadrunner-server/config/v5"
 	"github.com/roadrunner-server/endure/v2"
 	httpPlugin "github.com/roadrunner-server/http/v5"
-	"github.com/roadrunner-server/logger/v5"
+	"github.com/roadrunner-server/logger/v6"
 	"github.com/roadrunner-server/rpc/v5"
 	"github.com/roadrunner-server/server/v5"
 	"github.com/stretchr/testify/assert"
@@ -25,10 +25,8 @@ import (
 func TestLogger(t *testing.T) {
 	container := endure.New(slog.LevelDebug)
 
-	// config plugin
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr.yaml"
-	vp.Prefix = "rr"
 
 	err := container.RegisterAll(
 		vp,
@@ -47,17 +45,13 @@ func TestLogger(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// stop by CTRL+C
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
 	stopCh := make(chan struct{}, 1)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
+	var wg sync.WaitGroup
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-errCh:
@@ -73,7 +67,7 @@ func TestLogger(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	stopCh <- struct{}{}
 	wg.Wait()
@@ -82,11 +76,9 @@ func TestLogger(t *testing.T) {
 func TestLoggerRawErr(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
-	// config plugin
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2025.1.11",
 		Path:    "configs/.rr-raw-mode.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -108,13 +100,10 @@ func TestLoggerRawErr(t *testing.T) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
 	stopCh := make(chan struct{}, 1)
 
-	go func() {
-		defer wg.Done()
+	var wg sync.WaitGroup
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-ch:
@@ -130,7 +119,6 @@ func TestLoggerRawErr(t *testing.T) {
 				}
 				return
 			case <-stopCh:
-				// timeout
 				err = cont.Stop()
 				if err != nil {
 					assert.FailNow(t, "error", err.Error())
@@ -138,17 +126,20 @@ func TestLoggerRawErr(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
-	time.Sleep(time.Second)
-	resp, err := http.Get("http://127.0.0.1:34999")
-	assert.NoError(t, err)
-	require.NotNil(t, resp)
+	assert.EventuallyWithT(t, func(ct *assert.CollectT) {
+		req, reqErr := http.NewRequestWithContext(t.Context(), http.MethodGet, "http://127.0.0.1:34999", nil)
+		assert.NoError(ct, reqErr)
 
-	_, _ = io.Copy(io.Discard, resp.Body)
-	_ = resp.Body.Close()
+		resp, doErr := http.DefaultClient.Do(req)
+		assert.NoError(ct, doErr)
 
-	time.Sleep(time.Second)
+		if resp != nil {
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
+		}
+	}, 10*time.Second, 100*time.Millisecond)
 
 	stopCh <- struct{}{}
 	wg.Wait()
@@ -157,10 +148,8 @@ func TestLoggerRawErr(t *testing.T) {
 func TestLoggerNoConfig(t *testing.T) {
 	container := endure.New(slog.LevelDebug)
 
-	// config plugin
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr-no-logger.yaml"
-	vp.Prefix = "rr"
 
 	err := container.RegisterAll(
 		vp,
@@ -179,17 +168,13 @@ func TestLoggerNoConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// stop by CTRL+C
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
 	stopCh := make(chan struct{}, 1)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
+	var wg sync.WaitGroup
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-errCh:
@@ -205,20 +190,19 @@ func TestLoggerNoConfig(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	stopCh <- struct{}{}
 	wg.Wait()
 }
 
-// Should no panic
+// TestLoggerNoConfig2 verifies no panic when plugins are disabled due to
+// missing dependencies.
 func TestLoggerNoConfig2(t *testing.T) {
 	container := endure.New(slog.LevelDebug)
 
-	// config plugin
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr-no-logger2.yaml"
-	vp.Prefix = "rr"
 
 	err := container.RegisterAll(
 		vp,
@@ -239,17 +223,13 @@ func TestLoggerNoConfig2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// stop by CTRL+C
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
 	stopCh := make(chan struct{}, 1)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
+	var wg sync.WaitGroup
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-errCh:
@@ -265,7 +245,7 @@ func TestLoggerNoConfig2(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	stopCh <- struct{}{}
 	wg.Wait()
@@ -274,10 +254,8 @@ func TestLoggerNoConfig2(t *testing.T) {
 func TestFileLogger(t *testing.T) {
 	container := endure.New(slog.LevelDebug)
 
-	// config plugin
 	vp := &config.Plugin{}
 	vp.Path = "configs/.rr-file-logger.yaml"
-	vp.Prefix = "rr"
 
 	err := container.RegisterAll(
 		vp,
@@ -298,17 +276,13 @@ func TestFileLogger(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// stop by CTRL+C
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
 	stopCh := make(chan struct{}, 1)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
+	var wg sync.WaitGroup
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-errCh:
@@ -324,7 +298,7 @@ func TestFileLogger(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	time.Sleep(time.Second * 2)
 	t.Run("HTTPEchoReq", httpEcho)
@@ -334,8 +308,8 @@ func TestFileLogger(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	strings.Contains(string(f), "worker constructed")
-	strings.Contains(string(f), "201 GET")
+	assert.Contains(t, string(f), "worker constructed")
+	assert.Contains(t, string(f), "201 GET")
 
 	_ = os.Remove("test.log")
 
@@ -343,25 +317,11 @@ func TestFileLogger(t *testing.T) {
 	wg.Wait()
 }
 
-func httpEcho(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:54224?hello=world", nil)
-	assert.NoError(t, err)
-
-	r, err := http.DefaultClient.Do(req)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusCreated, r.StatusCode)
-
-	err = r.Body.Close()
-	assert.NoError(t, err)
-}
-
-func TestMarshalObjectLogging(t *testing.T) {
+func TestLoggerCustomFormat(t *testing.T) {
 	container := endure.New(slog.LevelDebug)
 
-	// config plugin
 	vp := &config.Plugin{}
-	vp.Path = "configs/.rr-file-logger.yaml"
-	vp.Prefix = "rr"
+	vp.Path = "configs/.rr-custom-format.yaml"
 
 	err := container.RegisterAll(
 		vp,
@@ -380,17 +340,13 @@ func TestMarshalObjectLogging(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// stop by CTRL+C
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
 	stopCh := make(chan struct{}, 1)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
+	var wg sync.WaitGroup
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-errCh:
@@ -406,7 +362,71 @@ func TestMarshalObjectLogging(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
+
+	stopCh <- struct{}{}
+	wg.Wait()
+}
+
+func httpEcho(t *testing.T) {
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, "http://127.0.0.1:54224?hello=world", nil)
+	assert.NoError(t, err)
+
+	r, err := http.DefaultClient.Do(req)
+	assert.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Equal(t, http.StatusCreated, r.StatusCode)
+
+	err = r.Body.Close()
+	assert.NoError(t, err)
+}
+
+func TestMarshalObjectLogging(t *testing.T) {
+	container := endure.New(slog.LevelDebug)
+
+	vp := &config.Plugin{}
+	vp.Path = "configs/.rr-file-logger.yaml"
+
+	err := container.RegisterAll(
+		vp,
+		&TestPlugin{},
+		&logger.Plugin{},
+	)
+	assert.NoError(t, err)
+
+	err = container.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	errCh, err := container.Serve()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	stopCh := make(chan struct{}, 1)
+
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		for {
+			select {
+			case e := <-errCh:
+				assert.NoError(t, e.Error)
+				assert.NoError(t, container.Stop())
+				return
+			case <-c:
+				err = container.Stop()
+				assert.NoError(t, err)
+				return
+			case <-stopCh:
+				assert.NoError(t, container.Stop())
+				return
+			}
+		}
+	})
 
 	time.Sleep(time.Second * 2)
 

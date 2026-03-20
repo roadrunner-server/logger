@@ -1,0 +1,6 @@
+version: '3'
+
+logs:
+  format: "%time% [%level%] %message% %attrs%"
+  time_format: "2006-01-02 15:04:05"
+  level: info
