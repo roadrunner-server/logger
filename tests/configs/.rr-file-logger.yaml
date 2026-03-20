@@ -19,7 +19,6 @@ http:
     destroy_timeout: 60s
 
 logs:
-  mode: development
+  mode: production
   level: debug
-  file_logger_options:
-    log_output: "test.log"
+  output: ["test.log"]

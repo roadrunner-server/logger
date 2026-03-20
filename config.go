@@ -7,71 +7,12 @@ import (
 	"strings"
 
 	"github.com/roadrunner-server/errors"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // ChannelConfig configures loggers per channel.
 type ChannelConfig struct {
 	// Dedicated channels per logger. By default logger allocated via named logger.
 	Channels map[string]*Config `mapstructure:"channels"`
-}
-
-// FileLoggerConfig represents configuration for the file logger backed by
-// lumberjack for log rotation.
-type FileLoggerConfig struct {
-	// LogOutput is the file to write logs to. Uses <processname>-lumberjack.log
-	// in os.TempDir() if empty.
-	LogOutput string `mapstructure:"log_output"`
-
-	// MaxSize is the maximum size in megabytes of the log file before it gets
-	// rotated. It defaults to 100 megabytes.
-	MaxSize int `mapstructure:"max_size"`
-
-	// MaxAge is the maximum number of days to retain old log files based on the
-	// timestamp encoded in their filename.  Note that a day is defined as 24
-	// hours and may not exactly correspond to calendar days due to daylight
-	// savings, leap seconds, etc. The default is not to remove old log files
-	// based on age.
-	MaxAge int `mapstructure:"max_age"`
-
-	// MaxBackups is the maximum number of old log files to retain. The default
-	// is to retain all old log files (though MaxAge may still cause them to get
-	// deleted).
-	MaxBackups int `mapstructure:"max_backups"`
-
-	// Compress determines if the rotated log files should be compressed using
-	// gzip. The default is not to perform compression.
-	Compress bool `mapstructure:"compress"`
-}
-
-// NewLumberjack creates a configured [lumberjack.Logger] from the file logger
-// settings, calling [InitDefaults] first to fill zero-value fields.
-func (fl *FileLoggerConfig) NewLumberjack() *lumberjack.Logger {
-	fl.InitDefaults()
-	return &lumberjack.Logger{
-		Filename:   fl.LogOutput,
-		MaxSize:    fl.MaxSize,
-		MaxAge:     fl.MaxAge,
-		MaxBackups: fl.MaxBackups,
-		Compress:   fl.Compress,
-	}
-}
-
-// InitDefaults fills zero-value fields with sensible defaults.
-func (fl *FileLoggerConfig) InitDefaults() *FileLoggerConfig {
-	if fl.LogOutput == "" {
-		fl.LogOutput = os.TempDir()
-	}
-	if fl.MaxSize == 0 {
-		fl.MaxSize = 100
-	}
-	if fl.MaxAge == 0 {
-		fl.MaxAge = 24
-	}
-	if fl.MaxBackups == 0 {
-		fl.MaxBackups = 10
-	}
-	return fl
 }
 
 // Config holds the logger configuration for a single channel.
@@ -109,9 +50,6 @@ type Config struct {
 	// ErrorOutput is a list of URLs to write internal logger errors to. The
 	// default is standard error.
 	ErrorOutput []string `mapstructure:"err_output"`
-
-	// FileLogger options for lumberjack-based file rotation.
-	FileLogger *FileLoggerConfig `mapstructure:"file_logger_options"`
 }
 
 // BuildResult holds the logger and any resources that need cleanup.
@@ -144,31 +82,13 @@ func (cfg *Config) BuildLogger() (*BuildResult, error) {
 
 	// Custom format: build a FormatHandler instead of mode-based handlers.
 	if cfg.Format != "" {
-		targetWriter := w
-		if cfg.FileLogger != nil {
-			lj := cfg.FileLogger.NewLumberjack()
-			closers = append(closers, lj)
-			targetWriter = lj
-		}
-
 		return &BuildResult{
-			Logger: slog.New(NewFormatHandler(targetWriter, &FormatHandlerOptions{
+			Logger: slog.New(NewFormatHandler(w, &FormatHandlerOptions{
 				Level:      level,
 				Format:     cfg.Format,
 				TimeLayout: cfg.TimeFormat,
 				LineEnding: new(cfg.lineEnding()),
 			})),
-			Closers: closers,
-		}, nil
-	}
-
-	// File Logger: use lumberjack writer with JSON handler.
-	if cfg.FileLogger != nil {
-		lj := cfg.FileLogger.NewLumberjack()
-		closers = append(closers, lj)
-
-		return &BuildResult{
-			Logger:  slog.New(slog.NewJSONHandler(lj, &slog.HandlerOptions{Level: level})),
 			Closers: closers,
 		}, nil
 	}

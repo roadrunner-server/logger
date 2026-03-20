@@ -31,6 +31,7 @@ type Plugin struct {
 	cfg      *Config
 	channels ChannelConfig
 	closers  []io.Closer
+	logs     []*Log
 }
 
 // Init logger service.
@@ -83,8 +84,11 @@ func (p *Plugin) Serve() chan error {
 }
 
 // Stop gracefully shuts down the plugin, closing any file handles opened for
-// log output.
+// log output — both root-level and per-channel closers.
 func (p *Plugin) Stop(context.Context) error {
+	for _, l := range p.logs {
+		_ = l.Close()
+	}
 	for _, c := range p.closers {
 		_ = c.Close()
 	}
@@ -100,7 +104,9 @@ func (p *Plugin) Provides() []*dep.Out {
 
 // ServiceLogger returns a logger dedicated to the specific channel.
 func (p *Plugin) ServiceLogger() *Log {
-	return NewLogger(p.channels, p.base)
+	l := NewLogger(p.channels, p.base)
+	p.logs = append(p.logs, l)
+	return l
 }
 
 // Name returns a user-friendly plugin name.

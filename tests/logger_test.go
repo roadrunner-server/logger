@@ -128,19 +128,18 @@ func TestLoggerRawErr(t *testing.T) {
 		}
 	})
 
-	time.Sleep(time.Second)
+	assert.EventuallyWithT(t, func(ct *assert.CollectT) {
+		req, reqErr := http.NewRequestWithContext(t.Context(), http.MethodGet, "http://127.0.0.1:34999", nil)
+		assert.NoError(ct, reqErr)
 
-	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, "http://127.0.0.1:34999", nil)
-	assert.NoError(t, err)
+		resp, doErr := http.DefaultClient.Do(req)
+		assert.NoError(ct, doErr)
 
-	resp, err := http.DefaultClient.Do(req)
-	assert.NoError(t, err)
-	require.NotNil(t, resp)
-
-	_, _ = io.Copy(io.Discard, resp.Body)
-	_ = resp.Body.Close()
-
-	time.Sleep(time.Second)
+		if resp != nil {
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
+		}
+	}, 10*time.Second, 100*time.Millisecond)
 
 	stopCh <- struct{}{}
 	wg.Wait()
