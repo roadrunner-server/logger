@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const (
+	fmtMessage      = "%message%"
+	fmtMessageAttrs = "%message% %attrs%"
+)
+
 func TestFormatHandler_BasicPlaceholders(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
@@ -37,7 +42,7 @@ func TestFormatHandler_Attrs(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message% %attrs%",
+		Format: fmtMessageAttrs,
 	})
 
 	r := slog.NewRecord(time.Time{}, slog.LevelInfo, "req", 0)
@@ -59,7 +64,7 @@ func TestFormatHandler_WithAttrs(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message% %attrs%",
+		Format: fmtMessageAttrs,
 	})
 
 	child := h.WithAttrs([]slog.Attr{slog.String("pid", "1234")})
@@ -97,7 +102,7 @@ func TestFormatHandler_WithAttrsEmpty(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message%",
+		Format: fmtMessage,
 	})
 
 	// WithAttrs with empty slice should return the same handler.
@@ -111,7 +116,7 @@ func TestFormatHandler_WithGroup(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message% %attrs%",
+		Format: fmtMessageAttrs,
 	})
 
 	child := h.WithGroup("http")
@@ -135,7 +140,7 @@ func TestFormatHandler_WithGroupEmpty(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message%",
+		Format: fmtMessage,
 	})
 
 	child := h.WithGroup("")
@@ -148,7 +153,7 @@ func TestFormatHandler_NestedGroups(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message% %attrs%",
+		Format: fmtMessageAttrs,
 	})
 
 	child := h.WithGroup("http").WithGroup("request")
@@ -265,7 +270,7 @@ func TestFormatHandler_CustomLineEnding(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:      slog.LevelDebug,
-		Format:     "%message%",
+		Format:     fmtMessage,
 		LineEnding: new("\r\n"),
 	})
 
@@ -287,9 +292,9 @@ func TestFormatHandler_SkipLineEnding(t *testing.T) {
 	// from config through to handler output.
 	var buf bytes.Buffer
 	cfg := &Config{
-		Format:         "%message%",
+		Format:         fmtMessage,
 		SkipLineEnding: true,
-		Level:          "debug",
+		Level:          levelDebug,
 	}
 	cfg.InitDefault()
 
@@ -316,7 +321,7 @@ func TestFormatHandler_LevelFiltering(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelWarn,
-		Format: "%message%",
+		Format: fmtMessage,
 	})
 
 	if h.Enabled(t.Context(), slog.LevelDebug) {
@@ -337,7 +342,7 @@ func TestFormatHandler_ConcurrentWrites(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message% %attrs%",
+		Format: fmtMessageAttrs,
 	})
 
 	const n = 100
@@ -440,9 +445,9 @@ func TestFormatHandler_ZeroTime(t *testing.T) {
 
 func TestFormatHandler_ConfigLineEnding(t *testing.T) {
 	cfg := &Config{
-		Format:     "%message%",
+		Format:     fmtMessage,
 		LineEnding: "\r\n",
-		Level:      "info",
+		Level:      levelInfo,
 	}
 	cfg.InitDefault()
 
@@ -461,9 +466,9 @@ func TestFormatHandler_ConfigLineEnding(t *testing.T) {
 
 func TestFormatHandler_ConfigSkipLineEnding(t *testing.T) {
 	cfg := &Config{
-		Format:         "%message%",
+		Format:         fmtMessage,
 		SkipLineEnding: true,
-		Level:          "info",
+		Level:          levelInfo,
 	}
 	cfg.InitDefault()
 
@@ -477,7 +482,7 @@ func TestFormatHandler_ConfigFormatOverridesMode(t *testing.T) {
 	cfg := &Config{
 		Mode:   production,
 		Format: "%level% %message%",
-		Level:  "info",
+		Level:  levelInfo,
 	}
 	cfg.InitDefault()
 
@@ -529,7 +534,7 @@ func TestFormatHandler_GroupWithPreAttrs(t *testing.T) {
 	var buf bytes.Buffer
 	h := NewFormatHandler(&buf, &FormatHandlerOptions{
 		Level:  slog.LevelDebug,
-		Format: "%message% %attrs%",
+		Format: fmtMessageAttrs,
 	})
 
 	// Pre-attach an attr, then add a group.

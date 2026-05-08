@@ -9,6 +9,11 @@ import (
 	"github.com/roadrunner-server/errors"
 )
 
+const (
+	levelDebug = "debug"
+	levelInfo  = "info"
+)
+
 // ChannelConfig configures loggers per channel.
 type ChannelConfig struct {
 	// Dedicated channels per logger. By default logger allocated via named logger.
@@ -121,7 +126,7 @@ func (cfg *Config) InitDefault() {
 		cfg.Mode = development
 	}
 	if cfg.Level == "" {
-		cfg.Level = "debug"
+		cfg.Level = levelDebug
 	}
 }
 
@@ -178,9 +183,9 @@ func (cfg *Config) lineEnding() string {
 // parseLevel converts a level string to the corresponding [slog.Level].
 func parseLevel(s string) slog.Level {
 	switch strings.ToLower(strings.TrimSpace(s)) {
-	case "debug":
+	case levelDebug:
 		return slog.LevelDebug
-	case "info":
+	case levelInfo:
 		return slog.LevelInfo
 	case "warn", "warning":
 		return slog.LevelWarn
