@@ -8,7 +8,7 @@ require (
 	github.com/roadrunner-server/errors v1.5.0
 	github.com/roadrunner-server/http/v6 v6.0.0-beta.4
 	github.com/roadrunner-server/logger/v6 v6.0.0
-	github.com/roadrunner-server/rpc/v6 v6.0.0-beta.3
+	github.com/roadrunner-server/rpc/v6 v6.0.0-beta.4
 	github.com/roadrunner-server/server/v6 v6.0.0-beta.4
 	github.com/stretchr/testify v1.11.1
 )
@@ -16,6 +16,8 @@ require (
 replace github.com/roadrunner-server/logger/v6 => ../
 
 require (
+	connectrpc.com/connect v1.19.2 // indirect
+	connectrpc.com/grpcreflect v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/caddyserver/certmagic v0.25.3 // indirect
 	github.com/caddyserver/zerossl v0.1.5 // indirect
