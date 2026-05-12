@@ -3,7 +3,7 @@ module tests
 go 1.26
 
 require (
-	github.com/roadrunner-server/config/v6 v6.0.0-beta.2
+	github.com/roadrunner-server/config/v6 v6.0.0-beta.3
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/errors v1.5.0
 	github.com/roadrunner-server/http/v6 v6.0.0-beta.4
