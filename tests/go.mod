@@ -2,6 +2,8 @@ module tests
 
 go 1.26
 
+toolchain go1.26.3
+
 require (
 	github.com/roadrunner-server/config/v6 v6.0.0-beta.3
 	github.com/roadrunner-server/endure/v2 v2.6.2
