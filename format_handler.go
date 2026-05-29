@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -208,8 +209,8 @@ func (h *FormatHandler) clone() *FormatHandler {
 		format:      h.format,
 		timeLayout:  h.timeLayout,
 		lineEnding:  h.lineEnding,
-		preAttrs:    append([]slog.Attr(nil), h.preAttrs...),
-		groups:      append([]string(nil), h.groups...),
+		preAttrs:    slices.Clone(h.preAttrs),
+		groups:      slices.Clone(h.groups),
 		grpPfx:      h.grpPfx,
 		mu:          h.mu, // shared across clones
 		needsSource: h.needsSource,
