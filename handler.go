@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"log/slog"
-	"strings"
 	"sync"
 )
 
@@ -34,17 +33,12 @@ func (h *RawHandler) Handle(_ context.Context, r slog.Record) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	if _, err := io.WriteString(h.w, r.Message); err != nil {
-		return err
+	msg := r.Message
+	if len(msg) == 0 || msg[len(msg)-1] != '\n' {
+		msg += "\n"
 	}
-
-	if !strings.HasSuffix(r.Message, "\n") {
-		if _, err := io.WriteString(h.w, "\n"); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err := io.WriteString(h.w, msg)
+	return err
 }
 
 // WithAttrs returns the same handler — raw mode discards attributes.
