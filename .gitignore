@@ -19,3 +19,5 @@ vendor/
 .DS_Store
 **/composer.lock
 .claude/settings.local.json
+# log files the tests write
+tests/*.log
