@@ -61,16 +61,20 @@ jobs:
       - name: Install Go dependencies
         run: go mod download
 
+      - name: Run root module unit tests with coverage
+        run: |
+          mkdir ./tests/coverage-ci
+          go test -timeout 5m -v -race -cover -tags=debug -coverpkg=./... -coverprofile=./tests/coverage-ci/logger_unit.out -covermode=atomic ./...
+
       - name: Run golang tests with coverage
         run: |
           cd tests
-          mkdir ./coverage-ci
-          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=./... -coverprofile=./coverage-ci/logger.out -covermode=atomic ./...
+          go test -timeout 20m -v -race -cover -tags=debug -coverpkg=github.com/roadrunner-server/logger/v6/... -coverprofile=./coverage-ci/logger.out -covermode=atomic ./...
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v7
         with:
-          name: coverage
+          name: coverage-logger
           path: ./tests/coverage-ci
 
   codecov:
@@ -99,6 +103,12 @@ jobs:
             }
           ' summary.txt > summary.filtered.txt
           mv summary.filtered.txt summary.txt
+          # a profile that maps to no plugin source uploads fine and reports 0%
+          blocks=$(($(wc -l < summary.txt) - 1))
+          if [ "$blocks" -lt 10 ]; then
+            echo "::error::coverage summary holds $blocks blocks, the profile does not map to plugin sources"
+            exit 1
+          fi
       - name: upload to codecov
         uses: codecov/codecov-action@v7
         with:
