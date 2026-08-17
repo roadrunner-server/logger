@@ -308,8 +308,8 @@ func TestFileLogger(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Contains(t, string(f), "worker constructed")
-	assert.Contains(t, string(f), "201 GET")
+	assert.Contains(t, string(f), "worker is allocated")
+	assert.Contains(t, string(f), `"status":201`)
 
 	_ = os.Remove("test.log")
 
