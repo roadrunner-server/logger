@@ -1,8 +1,8 @@
 module github.com/roadrunner-server/logger/v6
 
-go 1.26
+go 1.27
 
-toolchain go1.26.6
+toolchain go1.27.0
 
 require (
 	github.com/roadrunner-server/endure/v2 v2.6.2
