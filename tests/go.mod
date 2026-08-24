@@ -8,7 +8,7 @@ require (
 	github.com/roadrunner-server/config/v6 v6.0.0-beta.3
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/errors v1.5.0
-	github.com/roadrunner-server/http/v6 v6.0.0-beta.9
+	github.com/roadrunner-server/http/v6 v6.0.0-beta.10
 	github.com/roadrunner-server/logger/v6 v6.0.0
 	github.com/roadrunner-server/server/v6 v6.0.0-beta.6
 	github.com/stretchr/testify v1.12.1
