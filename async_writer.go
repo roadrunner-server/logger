@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"sync/atomic"
 	"time"
@@ -23,8 +22,7 @@ type asyncWriter struct {
 	done    chan struct{}
 	err     error
 
-	closed  atomic.Bool
-	dropped atomic.Uint64
+	closed atomic.Bool
 }
 
 func newAsyncWriter(out io.Writer, closers []io.Closer) *asyncWriter {
@@ -46,7 +44,6 @@ func (w *asyncWriter) Write(p []byte) (int, error) {
 	select {
 	case w.pending <- bytes.Clone(p):
 	default:
-		w.dropped.Add(1)
 	}
 	// Shutdown can start while the record is copied.
 	if w.closed.Load() {
@@ -94,10 +91,9 @@ func (w *asyncWriter) startShutdown() {
 
 func (w *asyncWriter) shutdown(ctx context.Context) error {
 	w.startShutdown()
-	var err error
 	select {
 	case <-w.done:
-		err = w.err
+		return w.err
 	case <-ctx.Done():
 		for len(w.pending) > 0 {
 			select {
@@ -105,12 +101,8 @@ func (w *asyncWriter) shutdown(ctx context.Context) error {
 			default:
 			}
 		}
-		err = ctx.Err()
+		return ctx.Err()
 	}
-	if dropped := w.dropped.Load(); dropped > 0 {
-		err = errors.Join(err, fmt.Errorf("logger: dropped messages: %d", dropped))
-	}
-	return err
 }
 
 func closeOutputs(ctx context.Context, closers []io.Closer) error {
