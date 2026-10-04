@@ -83,16 +83,16 @@ func (p *Plugin) Serve() chan error {
 	return make(chan error, 1)
 }
 
-// Stop gracefully shuts down the plugin, closing any file handles opened for
-// log output — both root-level and per-channel closers.
-func (p *Plugin) Stop(context.Context) error {
+// Stop drains output until the context expires or five seconds pass.
+func (p *Plugin) Stop(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, flushTimeout)
+	defer cancel()
+	closers := p.closers
+	p.closers = nil
 	for _, l := range p.logs {
-		_ = l.Close()
+		closers = append(closers, l.takeClosers()...)
 	}
-	for _, c := range p.closers {
-		_ = c.Close()
-	}
-	return nil
+	return closeOutputs(ctx, closers)
 }
 
 // Provides declares the services this plugin exports.

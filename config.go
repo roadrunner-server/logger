@@ -57,7 +57,7 @@ type Config struct {
 	ErrorOutput []string `mapstructure:"err_output"`
 }
 
-// BuildResult holds the logger and any resources that need cleanup.
+// BuildResult holds the logger and output resources. Close its Closers to drain output.
 type BuildResult struct {
 	Logger  *slog.Logger
 	Closers []io.Closer
@@ -84,6 +84,8 @@ func (cfg *Config) BuildLogger() (*BuildResult, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+	writer := newAsyncWriter(w, closers)
+	w, closers = writer, []io.Closer{writer}
 
 	// Custom format: build a FormatHandler instead of mode-based handlers.
 	if cfg.Format != "" {
