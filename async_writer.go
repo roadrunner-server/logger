@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"sync/atomic"
 	"time"
 )
 
@@ -18,19 +17,20 @@ type asyncWriter struct {
 	out     io.Writer
 	closers []io.Closer
 	pending chan []byte
-	stop    chan struct{}
+	ctx     context.Context
+	cancel  context.CancelFunc
 	done    chan struct{}
 	err     error
-
-	closed atomic.Bool
 }
 
 func newAsyncWriter(out io.Writer, closers []io.Closer) *asyncWriter {
+	ctx, cancel := context.WithCancel(context.Background())
 	w := &asyncWriter{
 		out:     out,
 		closers: closers,
 		pending: make(chan []byte, logQueueSize),
-		stop:    make(chan struct{}),
+		ctx:     ctx,
+		cancel:  cancel,
 		done:    make(chan struct{}),
 	}
 	go w.run()
@@ -38,7 +38,7 @@ func newAsyncWriter(out io.Writer, closers []io.Closer) *asyncWriter {
 }
 
 func (w *asyncWriter) Write(p []byte) (int, error) {
-	if w.closed.Load() {
+	if w.ctx.Err() != nil {
 		return 0, io.ErrClosedPipe
 	}
 	select {
@@ -46,7 +46,7 @@ func (w *asyncWriter) Write(p []byte) (int, error) {
 	default:
 	}
 	// Shutdown can start while the record is copied.
-	if w.closed.Load() {
+	if w.ctx.Err() != nil {
 		return 0, io.ErrClosedPipe
 	}
 	return len(p), nil
@@ -63,7 +63,7 @@ func (w *asyncWriter) run() {
 		var p []byte
 		select {
 		case p = <-w.pending:
-		case <-w.stop:
+		case <-w.ctx.Done():
 			select {
 			case p = <-w.pending:
 			default:
@@ -83,14 +83,8 @@ func (w *asyncWriter) Close() error {
 	return w.shutdown(ctx)
 }
 
-func (w *asyncWriter) startShutdown() {
-	if !w.closed.Swap(true) {
-		close(w.stop)
-	}
-}
-
 func (w *asyncWriter) shutdown(ctx context.Context) error {
-	w.startShutdown()
+	w.cancel()
 	select {
 	case <-w.done:
 		return w.err
@@ -107,17 +101,11 @@ func (w *asyncWriter) shutdown(ctx context.Context) error {
 
 func closeOutputs(ctx context.Context, closers []io.Closer) error {
 	for _, c := range closers {
-		if w, ok := c.(*asyncWriter); ok {
-			w.startShutdown()
-		}
+		c.(*asyncWriter).cancel()
 	}
-	var errs []error
-	for _, c := range closers {
-		if w, ok := c.(*asyncWriter); ok {
-			errs = append(errs, w.shutdown(ctx))
-		} else {
-			errs = append(errs, c.Close())
-		}
+	errs := make([]error, len(closers))
+	for i, c := range closers {
+		errs[i] = c.(*asyncWriter).shutdown(ctx)
 	}
 	return errors.Join(errs...)
 }
