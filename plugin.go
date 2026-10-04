@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	stderrors "errors"
 	"io"
 	"log/slog"
 
@@ -83,16 +84,16 @@ func (p *Plugin) Serve() chan error {
 	return make(chan error, 1)
 }
 
-// Stop gracefully shuts down the plugin, closing any file handles opened for
-// log output — both root-level and per-channel closers.
-func (p *Plugin) Stop(context.Context) error {
+// Stop drains output until the context expires or five seconds pass.
+func (p *Plugin) Stop(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, flushTimeout)
+	defer cancel()
+	errs := make([]error, 0, len(p.logs)+1)
 	for _, l := range p.logs {
-		_ = l.Close()
+		errs = append(errs, l.close(ctx))
 	}
-	for _, c := range p.closers {
-		_ = c.Close()
-	}
-	return nil
+	errs = append(errs, closeOutputs(ctx, p.closers))
+	return stderrors.Join(errs...)
 }
 
 // Provides declares the services this plugin exports.

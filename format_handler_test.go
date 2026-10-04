@@ -491,7 +491,11 @@ func TestFormatHandler_ConfigFormatOverridesMode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Verify the handler is a FormatHandler, not JSON.
+	t.Cleanup(func() {
+		for _, c := range res.Closers {
+			_ = c.Close()
+		}
+	})
 	_, ok := res.Logger.Handler().(*FormatHandler)
 	if !ok {
 		t.Errorf("expected *FormatHandler, got %T", res.Logger.Handler())

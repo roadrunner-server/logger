@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"errors"
+	"context"
 	"io"
 	"log/slog"
 	"sync"
@@ -46,19 +46,18 @@ func (l *Log) NamedLogger(name string) *slog.Logger {
 	return l.base.With("logger", name)
 }
 
-// Close releases all resources (file handles, file writers) opened by
-// channel-specific loggers created through [NamedLogger].
+// Close drains channel output for up to five seconds and closes its files.
 func (l *Log) Close() error {
+	ctx, cancel := context.WithTimeout(context.Background(), flushTimeout)
+	defer cancel()
+	return l.close(ctx)
+}
+
+func (l *Log) close(ctx context.Context) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	var errs []error
-	for _, c := range l.closers {
-		if err := c.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
+	err := closeOutputs(ctx, l.closers)
 	l.closers = nil
-
-	return errors.Join(errs...)
+	return err
 }
