@@ -1,81 +1,82 @@
 package logger
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
-	"sync"
+	"sync/atomic"
 	"time"
 )
 
 const (
-	logBufferSize = 1 << 20
-	flushTimeout  = 5 * time.Second
+	logQueueSize = 1024
+	flushTimeout = 5 * time.Second
 )
 
 type asyncWriter struct {
 	out     io.Writer
 	closers []io.Closer
-	wake    chan struct{}
+	pending chan []byte
+	stop    chan struct{}
 	done    chan struct{}
 	err     error
 
-	mu      sync.Mutex
-	pending []byte
-	closed  bool
-	dropped uint64
+	closed  atomic.Bool
+	dropped atomic.Uint64
 }
 
 func newAsyncWriter(out io.Writer, closers []io.Closer) *asyncWriter {
-	w := &asyncWriter{out: out, closers: closers, wake: make(chan struct{}, 1), done: make(chan struct{})}
+	w := &asyncWriter{
+		out:     out,
+		closers: closers,
+		pending: make(chan []byte, logQueueSize),
+		stop:    make(chan struct{}),
+		done:    make(chan struct{}),
+	}
 	go w.run()
 	return w
 }
 
 func (w *asyncWriter) Write(p []byte) (int, error) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-	if w.closed {
+	if w.closed.Load() {
 		return 0, io.ErrClosedPipe
 	}
-	if len(p) > logBufferSize-len(w.pending) {
-		w.dropped++
-		return len(p), nil
-	}
-	w.pending = append(w.pending, p...)
 	select {
-	case w.wake <- struct{}{}:
+	case w.pending <- bytes.Clone(p):
 	default:
+		w.dropped.Add(1)
+	}
+	// Shutdown can start while the record is copied.
+	if w.closed.Load() {
+		return 0, io.ErrClosedPipe
 	}
 	return len(p), nil
 }
 
 func (w *asyncWriter) run() {
-	defer close(w.done)
-	var batch []byte
-	for {
-		<-w.wake
-		w.mu.Lock()
-		batch, w.pending = w.pending, batch[:0]
-		closed := w.closed
-		if closed {
-			w.pending = nil
+	defer func() {
+		for _, c := range w.closers {
+			w.err = errors.Join(w.err, c.Close())
 		}
-		w.mu.Unlock()
-
-		if len(batch) > 0 {
-			_, err := w.out.Write(batch)
-			if w.err == nil {
-				w.err = err
+		close(w.done)
+	}()
+	for {
+		var p []byte
+		select {
+		case p = <-w.pending:
+		case <-w.stop:
+			select {
+			case p = <-w.pending:
+			default:
+				return
 			}
 		}
-		if closed {
-			break
+		_, err := w.out.Write(p)
+		if w.err == nil {
+			w.err = err
 		}
-	}
-	for _, c := range w.closers {
-		w.err = errors.Join(w.err, c.Close())
 	}
 }
 
@@ -85,32 +86,39 @@ func (w *asyncWriter) Close() error {
 	return w.shutdown(ctx)
 }
 
-func (w *asyncWriter) shutdown(ctx context.Context) error {
-	w.mu.Lock()
-	w.closed = true
-	dropped := w.dropped
-	select {
-	case w.wake <- struct{}{}:
-	default:
+func (w *asyncWriter) startShutdown() {
+	if !w.closed.Swap(true) {
+		close(w.stop)
 	}
-	w.mu.Unlock()
+}
+
+func (w *asyncWriter) shutdown(ctx context.Context) error {
+	w.startShutdown()
 	var err error
 	select {
 	case <-w.done:
 		err = w.err
 	case <-ctx.Done():
-		w.mu.Lock()
-		w.pending = nil
-		w.mu.Unlock()
+		for len(w.pending) > 0 {
+			select {
+			case <-w.pending:
+			default:
+			}
+		}
 		err = ctx.Err()
 	}
-	if dropped > 0 {
+	if dropped := w.dropped.Load(); dropped > 0 {
 		err = errors.Join(err, fmt.Errorf("logger: dropped messages: %d", dropped))
 	}
 	return err
 }
 
 func closeOutputs(ctx context.Context, closers []io.Closer) error {
+	for _, c := range closers {
+		if w, ok := c.(*asyncWriter); ok {
+			w.startShutdown()
+		}
+	}
 	var errs []error
 	for _, c := range closers {
 		if w, ok := c.(*asyncWriter); ok {

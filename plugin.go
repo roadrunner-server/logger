@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	stderrors "errors"
 	"io"
 	"log/slog"
 
@@ -88,12 +87,12 @@ func (p *Plugin) Serve() chan error {
 func (p *Plugin) Stop(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, flushTimeout)
 	defer cancel()
-	errs := make([]error, 0, len(p.logs)+1)
+	closers := p.closers
+	p.closers = nil
 	for _, l := range p.logs {
-		errs = append(errs, l.close(ctx))
+		closers = append(closers, l.takeClosers()...)
 	}
-	errs = append(errs, closeOutputs(ctx, p.closers))
-	return stderrors.Join(errs...)
+	return closeOutputs(ctx, closers)
 }
 
 // Provides declares the services this plugin exports.

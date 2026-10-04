@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"testing/synctest"
 	"time"
@@ -67,13 +68,13 @@ func TestAsyncWriterQueue(t *testing.T) {
 	tests := []struct {
 		name     string
 		size     int
-		wantSize int
+		records  int
 		wantTail string
 		wantDrop bool
 	}{
-		{name: "copied bytes", size: 10, wantSize: 10, wantTail: "tail\n"},
-		{name: "full queue", size: 1 << 20, wantSize: 1 << 20, wantDrop: true},
-		{name: "oversized record", size: (1 << 20) + 1, wantTail: "tail\n", wantDrop: true},
+		{name: "copied bytes", size: 10, records: 1, wantTail: "tail\n"},
+		{name: "full queue", size: 10, records: 1024, wantDrop: true},
+		{name: "large record", size: (1 << 20) + 1, records: 1, wantTail: "tail\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -86,8 +87,10 @@ func TestAsyncWriterQueue(t *testing.T) {
 				}
 				synctest.Wait()
 				p := bytes.Repeat([]byte("x"), tt.size)
-				if n, err := w.Write(p); n != len(p) || err != nil {
-					t.Fatalf("Write = %d, %v", n, err)
+				for range tt.records {
+					if n, err := w.Write(p); n != len(p) || err != nil {
+						t.Fatalf("Write = %d, %v", n, err)
+					}
 				}
 				clear(p)
 				if _, err := w.Write([]byte("tail\n")); err != nil {
@@ -104,7 +107,7 @@ func TestAsyncWriterQueue(t *testing.T) {
 					t.Fatal(err)
 				}
 				synctest.Wait()
-				want := "first\n" + strings.Repeat("x", tt.wantSize) + tt.wantTail
+				want := "first\n" + strings.Repeat("x", tt.size*tt.records) + tt.wantTail
 				if got.String() != want {
 					t.Errorf("output differs from the accepted records: got %d bytes, want %d", got.Len(), len(want))
 				}
@@ -140,8 +143,10 @@ func TestAsyncWriterShutdown(t *testing.T) {
 				w := newAsyncWriter(out, []io.Closer{out})
 				_, _ = w.Write([]byte("first\n"))
 				synctest.Wait()
-				_, _ = w.Write([]byte("queued\n"))
-				_, _ = w.Write(bytes.Repeat([]byte("x"), (1<<20)+1))
+				for range 1024 {
+					_, _ = w.Write([]byte("queued\n"))
+				}
+				_, _ = w.Write([]byte("dropped\n"))
 				ctx, cancel := context.WithTimeout(t.Context(), time.Second)
 				defer cancel()
 				start := time.Now()
@@ -173,7 +178,7 @@ func TestAsyncWriterConcurrentDrain(t *testing.T) {
 	var wg sync.WaitGroup
 	for range 16 {
 		wg.Go(func() {
-			for range 100 {
+			for range 64 {
 				if _, err := w.Write([]byte("record\n")); err != nil {
 					t.Error(err)
 				}
@@ -184,8 +189,91 @@ func TestAsyncWriterConcurrentDrain(t *testing.T) {
 	if err := w.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if got := out.String(); got != strings.Repeat("record\n", 1600) {
+	if got := out.String(); got != strings.Repeat("record\n", 1024) {
 		t.Errorf("concurrent output lost or corrupted records: got %d bytes", len(got))
+	}
+}
+
+func TestAsyncWriterConcurrentShutdown(t *testing.T) {
+	var out bytes.Buffer
+	w := newAsyncWriter(&out, nil)
+	var accepted atomic.Int64
+	var wg sync.WaitGroup
+	ready := make(chan struct{}, 16)
+	start := make(chan struct{})
+	for range 16 {
+		wg.Go(func() {
+			_, _ = w.Write([]byte("record\n"))
+			accepted.Add(1)
+			ready <- struct{}{}
+			<-start
+			for range 32 {
+				if _, err := w.Write([]byte("record\n")); err == nil {
+					accepted.Add(1)
+				} else if !errors.Is(err, io.ErrClosedPipe) {
+					t.Error(err)
+				}
+			}
+		})
+	}
+	for range 16 {
+		<-ready
+	}
+	close(start)
+	if err := w.Close(); err != nil {
+		t.Error(err)
+	}
+	wg.Wait()
+	if got := strings.Count(out.String(), "record\n"); int64(got) < accepted.Load() {
+		t.Errorf("drained %d records, accepted %d", got, accepted.Load())
+	}
+}
+
+func TestShutdownStartsAllOutputs(t *testing.T) {
+	tests := []struct {
+		name string
+		stop func(context.Context, *asyncWriter, *asyncWriter) error
+	}{
+		{name: "channel outputs", stop: func(_ context.Context, blocked, healthy *asyncWriter) error {
+			return (&Log{closers: []io.Closer{blocked, healthy}}).Close()
+		}},
+		{name: "root and channel outputs", stop: func(ctx context.Context, blocked, healthy *asyncWriter) error {
+			return (&Plugin{closers: []io.Closer{healthy}, logs: []*Log{{closers: []io.Closer{blocked}}}}).Stop(ctx)
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				r1, out1 := io.Pipe()
+				r2, out2 := io.Pipe()
+				defer func() { _ = r1.Close() }()
+				defer func() { _ = r2.Close() }()
+				blocked := newAsyncWriter(out1, []io.Closer{out1})
+				healthy := newAsyncWriter(out2, []io.Closer{out2})
+				_, _ = blocked.Write([]byte("blocked\n"))
+				_, _ = healthy.Write([]byte("healthy\n"))
+				drained := make(chan string, 1)
+				go func() {
+					data, _ := io.ReadAll(r2)
+					drained <- string(data)
+				}()
+				done := make(chan error, 1)
+				go func() { done <- tt.stop(t.Context(), blocked, healthy) }()
+				synctest.Wait()
+				select {
+				case got := <-drained:
+					if got != "healthy\n" {
+						t.Errorf("healthy output = %q", got)
+					}
+				default:
+					t.Error("healthy output shutdown waited for the blocked output")
+				}
+				_, _ = io.ReadAll(r1)
+				if err := <-done; err != nil {
+					t.Fatal(err)
+				}
+			})
+		})
 	}
 }
 

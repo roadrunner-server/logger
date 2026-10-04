@@ -50,14 +50,14 @@ func (l *Log) NamedLogger(name string) *slog.Logger {
 func (l *Log) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), flushTimeout)
 	defer cancel()
-	return l.close(ctx)
+	return closeOutputs(ctx, l.takeClosers())
 }
 
-func (l *Log) close(ctx context.Context) error {
+func (l *Log) takeClosers() []io.Closer {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	err := closeOutputs(ctx, l.closers)
+	closers := l.closers
 	l.closers = nil
-	return err
+	return closers
 }
