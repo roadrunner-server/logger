@@ -5,6 +5,6 @@ go 1.27
 toolchain go1.27.1
 
 require (
-	github.com/roadrunner-server/endure/v2 v2.6.2
+	github.com/roadrunner-server/endure/v2 v2.7.0
 	github.com/roadrunner-server/errors v1.6.0
 )
