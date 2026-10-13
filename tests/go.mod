@@ -10,7 +10,7 @@ require (
 	github.com/roadrunner-server/errors v1.6.0
 	github.com/roadrunner-server/http/v6 v6.0.0-beta.10
 	github.com/roadrunner-server/logger/v6 v6.0.0
-	github.com/roadrunner-server/server/v6 v6.0.0-beta.7
+	github.com/roadrunner-server/server/v6 v6.0.0
 	github.com/stretchr/testify v1.12.1
 )
 
