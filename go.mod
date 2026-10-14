@@ -2,9 +2,9 @@ module github.com/roadrunner-server/logger/v6
 
 go 1.27
 
-toolchain go1.27.1
+toolchain go1.27.2
 
 require (
-	github.com/roadrunner-server/endure/v2 v2.6.2
+	github.com/roadrunner-server/endure/v2 v2.7.0
 	github.com/roadrunner-server/errors v1.6.0
 )
