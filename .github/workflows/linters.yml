@@ -10,6 +10,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v7
 
+      - name: Check logger schema JSON
+        run: python3 -m json.tool schema.json > /dev/null
+
       - name: Set up Go
         uses: actions/setup-go@v7 # action page: <https://github.com/actions/setup-go>
         with:
